@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NGX Insight — Company Analysis (consolidated reference)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+  :root{
+    --ink:#14181C; --ink-soft:#4B5158; --ink-mute:#8A8F94;
+    --page:#F5F5F1; --surface:#FFFFFF; --surface-tint:#EFF1EC; --border:#E4E3DA;
+    --indigo:#5A54C4; --indigo-tint:#ECEAFA; --indigo-deep:#332F86;
+    --green:#1E8E5A; --green-tint:#E6F4EC;
+    --amber:#B7791F; --amber-tint:#FBF1DF;
+    --red:#B75151; --red-tint:#FBEBEB;
+    --radius-lg:24px; --radius-md:18px; --radius-sm:12px;
+    --shadow-hero: 0 2px 4px rgba(20,24,28,0.04), 0 14px 32px rgba(20,24,28,0.08);
+    --shadow-card: 0 1px 2px rgba(20,24,28,0.03), 0 6px 18px rgba(20,24,28,0.05);
+    --shadow-sheet: 0 -8px 32px rgba(20,24,28,0.18);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#DCDCD5;font-family:'Inter',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding:40px;}
+  .section-heading{width:100%;flex-basis:100%;text-align:center;margin:8px 0 -8px;}
+  .section-heading h2{font-family:'Fraunces',serif;font-size:22px;font-weight:500;color:var(--ink);margin:0 0 4px;}
+  .section-heading p{font-size:13px;color:var(--ink-soft);margin:0;max-width:560px;margin-left:auto;margin-right:auto;line-height:1.5;}
+  .frames{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .frame-block{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .frame-label{font-size:13px;font-weight:500;color:var(--ink-soft);background:var(--surface);border:1px solid var(--border);padding:6px 14px;border-radius:999px;}
+  .frame-note{max-width:393px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;background:var(--surface);border:1px dashed var(--border);padding:10px 14px;border-radius:12px;}
+  .frame-note b{color:var(--ink);}
+  .device{width:393px;height:852px;background:var(--page);border-radius:52px;border:1px solid #C9C9C1;box-shadow:0 30px 60px rgba(0,0,0,0.18);overflow:hidden;position:relative;display:flex;flex-direction:column;}
+  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#000;border-radius:16px;z-index:30;}
+  .scroll{flex:1;overflow-y:auto;padding:60px 20px 40px;position:relative;}
+  .scroll::-webkit-scrollbar{display:none;}
+  .device.with-sheet .scroll{overflow:hidden;}
+  .sheet-scrim{position:absolute;inset:0;background:rgba(20,24,28,0.4);z-index:15;}
+
+  .back-header{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+  .back-btn{width:36px;height:36px;border-radius:11px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);flex-shrink:0;}
+  .back-btn i{font-size:18px;}
+  .co-mark{width:36px;height:36px;border-radius:10px;background:var(--ink);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .co-id-text{flex:1;min-width:0;}
+  .co-name{font-family:'Fraunces',serif;font-size:16px;font-weight:500;margin:0;letter-spacing:-0.01em;}
+  .co-sector{font-size:11.5px;color:var(--ink-mute);margin:0;}
+
+  /* Decision card + actions */
+  .decision-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-hero);padding:22px 20px;margin-bottom:20px;}
+  .dc-kicker{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:500;color:var(--indigo-deep);background:var(--indigo-tint);padding:5px 10px;border-radius:999px;margin-bottom:14px;}
+  .dc-kicker.held{color:#0E5A3A;background:var(--green-tint);}
+  .dc-kicker i{font-size:12px;}
+  .dc-title{font-family:'Fraunces',serif;font-size:20px;font-weight:500;letter-spacing:-0.01em;line-height:1.28;margin:0 0 10px;}
+  .dc-copy{font-size:13px;color:var(--ink-soft);line-height:1.5;margin:0;}
+  .position-note{display:inline-flex;align-items:center;gap:6px;background:var(--green-tint);color:#0E5A3A;padding:5px 10px;border-radius:999px;font-size:11.5px;font-weight:500;margin-bottom:14px;}
+  .position-note i{font-size:12px;}
+  .action-row{display:flex;flex-direction:column;gap:8px;margin-top:18px;padding-top:18px;border-top:1px solid var(--border);}
+  .action-primary{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--ink);color:#fff;border:none;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;padding:13px;border-radius:var(--radius-sm);cursor:pointer;width:100%;}
+  .action-primary i{font-size:15px;}
+  .action-secondary{background:transparent;color:var(--ink-soft);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:7px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:11px;border-radius:var(--radius-sm);cursor:pointer;width:100%;}
+  .action-link{text-align:center;font-size:12.5px;color:var(--ink-mute);}
+  .action-link b{color:var(--indigo-deep);font-weight:500;}
+  .action-pair{display:flex;gap:8px;}
+  .action-pair .action-primary,.action-pair .action-secondary{width:auto;flex:1;}
+
+  /* Quick Check — condensed, 2 items: key strength + worth watching */
+  .qc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-card);margin-bottom:20px;}
+  .qc-kicker{font-size:10.5px;font-weight:500;letter-spacing:0.03em;text-transform:uppercase;color:var(--ink-mute);}
+  .qc-title{font-family:'Fraunces',serif;font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:4px 0 4px;}
+  .qc-generated{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-mute);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--surface-tint);}
+  .qc-generated i{font-size:12px;color:var(--indigo-deep);}
+  .qc-row{display:flex;align-items:flex-start;gap:11px;padding:11px 0;}
+  .qc-row+.qc-row{border-top:1px solid var(--surface-tint);}
+  .qc-badge{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .qc-badge.strength{background:var(--green-tint);color:#0E5A3A;}
+  .qc-badge.watch{background:var(--red-tint);color:var(--red);}
+  .qc-badge i{font-size:14px;}
+  .qc-row-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.02em;margin-bottom:2px;}
+  .qc-row-label.strength{color:#0E5A3A;}
+  .qc-row-label.watch{color:var(--red);}
+  .qc-category{font-size:10px;color:var(--ink-mute);margin-bottom:1px;}
+  .qc-text{font-size:13px;color:var(--ink);font-weight:500;}
+  .qc-seeall{display:flex;align-items:center;justify-content:center;gap:5px;font-size:12.5px;font-weight:500;color:var(--indigo-deep);margin-top:12px;padding-top:12px;border-top:1px solid var(--border);cursor:pointer;}
+  .qc-seeall i{font-size:13px;}
+
+  /* Section list */
+  .section-title{font-family:'Fraunces',serif;font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:0 0 4px;}
+  .section-sub{font-size:12px;color:var(--ink-mute);margin:0 0 14px;}
+  .sec-list{display:flex;flex-direction:column;gap:10px;}
+  .sec-item{display:flex;align-items:center;gap:13px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:15px 16px;box-shadow:var(--shadow-card);}
+  .sec-status{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--green-tint);color:#0E5A3A;}
+  .sec-status i{font-size:15px;}
+  .sec-name{font-size:13.5px;font-weight:600;color:var(--ink);}
+  .sec-tag{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.03em;color:var(--indigo-deep);background:var(--indigo-tint);padding:2px 6px;border-radius:5px;margin-left:7px;}
+  .sec-tag.optional{color:var(--ink-mute);background:var(--surface-tint);}
+  .sec-item.recommended{border-color:var(--indigo);box-shadow:0 0 0 1px var(--indigo), var(--shadow-card);}
+  .sec-status.next{background:var(--indigo);color:#fff;}
+  .sec-status.todo{background:var(--surface-tint);color:var(--ink-mute);}
+  .sec-body{flex:1;min-width:0;}
+  .sec-name-row{display:flex;align-items:center;gap:7px;margin-bottom:2px;}
+  .sec-desc{font-size:12px;color:var(--ink-mute);line-height:1.4;}
+  .sec-start-badge{font-size:10.5px;font-weight:600;color:var(--indigo-deep);margin-top:2px;}
+  .sec-chevron{color:var(--ink-mute);font-size:16px;flex-shrink:0;}
+
+  /* Compare With — curated + head-to-head + see all */
+  .section-wrap{margin-top:22px;}
+  .compare-scroll{display:flex;gap:12px;overflow-x:auto;margin:0 -20px;padding:0 20px 4px;scrollbar-width:none;}
+  .compare-scroll::-webkit-scrollbar{display:none;}
+  .compare-card-item{flex:0 0 210px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;box-shadow:var(--shadow-card);display:flex;flex-direction:column;gap:9px;cursor:pointer;}
+  .compare-name{font-size:13px;font-weight:600;}
+  .compare-diff-kicker{font-size:10px;color:var(--ink-mute);font-weight:500;}
+  .compare-diff{font-size:12px;color:var(--ink);line-height:1.45;margin:0;}
+  .compare-h2h{margin-top:2px;padding-top:9px;border-top:1px dashed var(--border);}
+  .compare-h2h-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.02em;color:var(--ink-mute);margin-bottom:4px;}
+  .compare-h2h-stat{font-size:12px;color:var(--ink-soft);}
+  .compare-h2h-stat b{color:var(--ink);font-weight:600;font-family:'IBM Plex Mono',monospace;}
+  .compare-seeall{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:500;color:var(--indigo-deep);margin-top:14px;padding:11px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;}
+  .compare-seeall i{font-size:14px;}
+
+  /* Section Detail (evidence) template */
+  .ev-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:18px 20px;box-shadow:var(--shadow-card);margin-bottom:14px;}
+  .ev-question{font-size:13.5px;font-weight:600;color:var(--ink);margin:0 0 12px;}
+  .metric-pair{display:flex;gap:10px;margin-bottom:12px;}
+  .metric-box{flex:1;background:var(--surface-tint);border-radius:var(--radius-sm);padding:12px 13px;}
+  .metric-label{font-size:10.5px;color:var(--ink-mute);margin-bottom:4px;}
+  .metric-value{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;color:var(--ink);}
+  .metric-qualifier{font-size:10px;font-weight:600;margin-top:3px;padding:2px 6px;border-radius:5px;display:inline-block;}
+  .metric-qualifier.high{background:var(--green-tint);color:#0E5A3A;}
+  .metric-qualifier.low{background:var(--amber-tint);color:var(--amber);}
+  .insight-line{font-size:13px;color:var(--ink-soft);line-height:1.55;margin:0;}
+  .insight-line b{color:var(--ink);font-weight:500;}
+  .dividend-note{font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);}
+  .dividend-note b{color:var(--ink);font-weight:500;}
+
+  /* Quick Check — full breakdown screen */
+  .fb-title{font-family:'Fraunces',serif;font-size:22px;font-weight:500;letter-spacing:-0.015em;margin:0 0 6px;}
+  .fb-sub{font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 20px;}
+  .fb-group{margin-bottom:16px;}
+  .fb-group-title{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+  .fb-item{display:flex;align-items:center;gap:10px;padding:9px 6px;margin:0 -6px;border-radius:9px;cursor:pointer;}
+  .fb-item:hover{background:var(--surface-tint);}
+  .fb-icon{width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .fb-icon.met{background:var(--green-tint);color:#0E5A3A;}
+  .fb-icon.notmet{background:var(--surface-tint);color:var(--ink-mute);}
+  .fb-icon i{font-size:12px;}
+  .fb-text{font-size:13px;color:var(--ink-soft);flex:1;}
+  .fb-chevron{font-size:15px;color:var(--ink-mute);flex-shrink:0;}
+  .fb-icon-type{font-size:9px;color:var(--ink-mute);text-transform:uppercase;font-weight:600;margin-left:6px;}
+  .fb-inline-panel{background:var(--surface-tint);border-radius:var(--radius-sm);padding:12px 13px;margin:2px 0 8px;font-size:12px;color:var(--ink-soft);line-height:1.5;}
+  .fb-inline-panel b{color:var(--ink);}
+  .fb-disclaimer{font-size:11.5px;color:var(--ink-mute);margin-top:8px;padding-top:16px;border-top:1px solid var(--border);line-height:1.55;}
+
+  /* Compare With — peer breakdown screen */
+  .bd-header{margin-bottom:20px;}
+  .bd-vs-row{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
+  .bd-co{display:flex;align-items:center;gap:8px;}
+  .bd-co-name{font-family:'Fraunces',serif;font-size:17px;font-weight:500;}
+  .bd-vs{font-size:12px;color:var(--ink-mute);font-weight:500;}
+  .bd-diff-line{font-size:13px;color:var(--ink-soft);line-height:1.5;margin:8px 0 0;}
+  .bd-table{width:100%;border-collapse:collapse;margin-top:20px;}
+  .bd-table th{font-size:10.5px;color:var(--ink-mute);text-align:center;font-weight:500;padding:8px 4px;border-bottom:1px solid var(--border);}
+  .bd-table th:first-child{text-align:left;}
+  .bd-table td{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink);text-align:center;padding:11px 4px;border-bottom:1px solid var(--surface-tint);}
+  .bd-table td:first-child{font-family:'Inter',sans-serif;font-size:12px;text-align:left;color:var(--ink-soft);}
+  .bd-table td.better{color:#0E5A3A;font-weight:600;}
+  .bd-full-link{display:flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:500;color:var(--indigo-deep);margin-top:22px;padding:13px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;}
+  .bd-full-link i{font-size:14px;}
+
+  /* Sheets: Buy / Sell / Pass */
+  .sheet{position:absolute;bottom:0;left:0;right:0;background:var(--surface);border-radius:24px 24px 0 0;padding:16px 20px 24px;box-shadow:var(--shadow-sheet);z-index:20;max-height:88%;overflow-y:auto;}
+  .sheet::-webkit-scrollbar{display:none;}
+  .sheet-handle{width:36px;height:4px;background:var(--border);border-radius:999px;margin:0 auto 14px;}
+  .seg-tabs{display:flex;background:var(--surface-tint);border-radius:12px;padding:3px;margin-bottom:18px;}
+  .seg-tab{flex:1;padding:9px 10px;text-align:center;font-size:12.5px;font-weight:500;color:var(--ink-soft);border-radius:9px;cursor:pointer;}
+  .seg-tab.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,24,28,0.05), 0 2px 8px rgba(20,24,28,0.05);}
+  .sheet-title{font-family:'Fraunces',serif;font-size:19px;font-weight:500;letter-spacing:-0.01em;margin:0 0 4px;}
+  .sheet-sub{font-size:12.5px;color:var(--ink-mute);margin:0 0 14px;line-height:1.5;}
+  .form-field{margin-bottom:12px;}
+  .form-label{font-size:11.5px;font-weight:500;color:var(--ink-soft);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+  .form-hint-inline{font-size:10.5px;color:var(--ink-mute);font-weight:400;}
+  .form-input{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);background:var(--surface);}
+  .form-input.filled{background:var(--surface-tint);}
+  .form-input:focus{outline:none;border-color:var(--indigo);background:var(--surface);}
+  .form-row{display:flex;gap:10px;}
+  .form-row .form-field{flex:1;}
+  .calc-block{background:var(--surface-tint);border-radius:var(--radius-md);padding:14px 16px;margin:14px 0;}
+  .calc-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;}
+  .calc-row+.calc-row{border-top:1px dashed var(--border);}
+  .calc-label{font-size:12px;color:var(--ink-soft);}
+  .calc-value{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink);font-weight:500;}
+  .calc-value.small{font-size:12.5px;}
+  .calc-value.gain{color:var(--green);}
+  .calc-value.loss{color:#B75151;}
+  .impact-note{font-size:12px;color:var(--ink-soft);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);line-height:1.5;}
+  .impact-note b{color:var(--ink);font-weight:600;}
+  .form-submit{width:100%;padding:13px;background:var(--ink);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .form-submit i{font-size:14px;}
+  .form-hint{font-size:11px;color:var(--ink-mute);margin-top:12px;line-height:1.5;text-align:center;}
+  .sell-picks{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+  .sell-pick{padding:6px 12px;border:1px solid var(--border);border-radius:999px;font-size:12px;font-weight:500;color:var(--ink-soft);cursor:pointer;background:var(--surface);}
+  .sell-pick.selected{background:var(--indigo-tint);color:var(--indigo-deep);border-color:transparent;}
+  .textarea-input{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);background:var(--surface);resize:none;min-height:90px;line-height:1.5;}
+  .textarea-input:focus{outline:none;border-color:var(--indigo);}
+  .quick-reasons{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;margin-bottom:8px;}
+  .quick-reason{font-size:11.5px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--ink-soft);cursor:pointer;}
+  .quick-reason.selected{background:var(--indigo-tint);border-color:transparent;color:var(--indigo-deep);}
+  .skip-link{display:block;text-align:center;font-size:12.5px;color:var(--ink-mute);margin-top:12px;padding:10px;text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<div class="frames">
+
+  <div class="section-heading"><h2>Hub</h2><p>The company's landing page. Structure is identical across relationship states — only the decision card, action row, Compare With visibility, and section-completion state change. Three concrete states are shown below: <b>No relationship</b> (just exploring), <b>Watching, complete review</b> (every core section read, not yet invested), and <b>Held</b> (already own it). "Watching, partial review" reuses the same layout as No relationship with some sections checked off instead of none — not separately mocked since nothing about its structure differs.</p></div>
+
+  <!-- ============= FRAME 1: HUB — NO RELATIONSHIP ============= -->
+  <div class="frame-block">
+    <div class="frame-label">1. Hub — No relationship (just exploring)</div>
+    <div class="frame-note">Arrived from Discover/Sector View, no Watchlist or Portfolio entry exists. No decision pressure, no locked thesis language — just a recommended starting point ("The Business"). <b>Compare With is hidden entirely</b> — too many exit doors before the user has even started. Action row shows only <b>Add to Watchlist</b> plus a text-link fallback for the edge case of already owning it; no Add to Portfolio button here.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text"><p class="co-name">Guaranty Trust Holding Co</p><p class="co-sector">Banking</p></div>
+        </div>
+
+        <div class="decision-card">
+          <div class="dc-kicker"><i class="ti ti-compass"></i>Just exploring</div>
+          <h1 class="dc-title">Understanding GTCO.</h1>
+          <p class="dc-copy">No pressure to decide anything yet. Work through what interests you, at your own pace.</p>
+          <div class="action-row">
+            <button class="action-secondary"><i class="ti ti-eye"></i>Add to Watchlist</button>
+            <div class="action-link">Already own this? <b>Add to Portfolio</b></div>
+          </div>
+        </div>
+
+        <p class="section-title">Understanding this business</p>
+        <p class="section-sub">Work through these in any order — we'll just point you to what's next.</p>
+        <div class="sec-list">
+          <div class="sec-item recommended">
+            <div class="sec-status next"><i class="ti ti-arrow-right"></i></div>
+            <div class="sec-body">
+              <div class="sec-name-row"><span class="sec-name">The Business</span><span class="sec-tag">Core</span></div>
+              <div class="sec-desc">What it does, who its customers are, and how it makes money</div>
+              <div class="sec-start-badge">Recommended next</div>
+            </div>
+            <i class="ti ti-chevron-right sec-chevron"></i>
+          </div>
+          <div class="sec-item">
+            <div class="sec-status todo"><i class="ti ti-point"></i></div>
+            <div class="sec-body"><div class="sec-name-row"><span class="sec-name">Financial Health</span><span class="sec-tag">Core</span></div><div class="sec-desc">Revenue, profit, and debt over the last few years</div></div>
+            <i class="ti ti-chevron-right sec-chevron"></i>
+          </div>
+          <div class="sec-item">
+            <div class="sec-status todo"><i class="ti ti-point"></i></div>
+            <div class="sec-body"><div class="sec-name-row"><span class="sec-name">Valuation</span><span class="sec-tag">Core</span></div><div class="sec-desc">Whether the current price looks fair, cheap, or expensive</div></div>
+            <i class="ti ti-chevron-right sec-chevron"></i>
+          </div>
+          <div class="sec-item">
+            <div class="sec-status todo"><i class="ti ti-point"></i></div>
+            <div class="sec-body"><div class="sec-name-row"><span class="sec-name">Risks</span><span class="sec-tag">Core</span></div><div class="sec-desc">What could go wrong, and how likely it is</div></div>
+            <i class="ti ti-chevron-right sec-chevron"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 2: HUB — WATCHING, COMPLETE REVIEW ============= -->
+  <div class="frame-block">
+    <div class="frame-label">2. Hub — Watching, complete review (not yet invested)</div>
+    <div class="frame-note">No tally anywhere ("X of 12" reads as a grade no matter how it's styled). Quick Check shows exactly 2 items — the single key strength and the single most important thing worth watching — not a running list. Section list is 4 core sections; "How It Compares" isn't a separate section anymore, its ranking data now lives directly on each Compare With peer card as a head-to-head stat. Compare With also carries a "See all N banks" link to the full sector, not just the curated pair.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text"><p class="co-name">Guaranty Trust Holding Co</p><p class="co-sector">Banking</p></div>
+        </div>
+
+        <div class="decision-card">
+          <div class="dc-kicker"><i class="ti ti-circle-check"></i>Complete picture — all 4 core sections reviewed</div>
+          <h1 class="dc-title">Here's what the evidence shows.</h1>
+          <p class="dc-copy">Placeholder: consistent profitability, a reasonable valuation relative to the sector, and manageable risk exposure.</p>
+          <div class="action-row">
+            <button class="action-primary"><i class="ti ti-plus"></i>Add to Portfolio</button>
+            <div class="action-link">Not the right fit? <b>Save my reasoning and pass</b></div>
+          </div>
+        </div>
+
+        <div class="qc-card">
+          <span class="qc-kicker">Quick Check</span>
+          <h2 class="qc-title">A fast look at the fundamentals.</h2>
+          <div class="qc-generated"><i class="ti ti-robot"></i>Generated automatically from public financial data.</div>
+          <div class="qc-row">
+            <div class="qc-badge strength"><i class="ti ti-check"></i></div>
+            <div><div class="qc-row-label strength">Key strength</div><div class="qc-category">Valuation</div><div class="qc-text">Trading below the sector average on price</div></div>
+          </div>
+          <div class="qc-row">
+            <div class="qc-badge watch"><i class="ti ti-alert-triangle"></i></div>
+            <div><div class="qc-row-label watch">Worth watching</div><div class="qc-category">Financial Strength</div><div class="qc-text">Capital buffer is thinner than sector peers</div></div>
+          </div>
+          <div class="qc-seeall">See full breakdown<i class="ti ti-arrow-right"></i></div>
+        </div>
+
+        <p class="section-title">Understanding this business</p>
+        <p class="section-sub">All core sections reviewed.</p>
+        <div class="sec-list">
+          <div class="sec-item"><div class="sec-status"><i class="ti ti-check"></i></div><span class="sec-name">The Business</span><span class="sec-tag">Core</span></div>
+          <div class="sec-item"><div class="sec-status"><i class="ti ti-check"></i></div><span class="sec-name">Financial Health</span><span class="sec-tag">Core</span></div>
+          <div class="sec-item"><div class="sec-status"><i class="ti ti-check"></i></div><span class="sec-name">Valuation</span><span class="sec-tag">Core</span></div>
+          <div class="sec-item"><div class="sec-status"><i class="ti ti-check"></i></div><span class="sec-name">Risks</span><span class="sec-tag">Core</span></div>
+        </div>
+
+        <div class="section-wrap">
+          <p class="section-title">Compare With</p>
+          <p class="section-sub">See how GTCO differs from other Nigerian banks.</p>
+          <div class="compare-scroll">
+            <div class="compare-card-item"><div class="compare-name">Zenith Bank</div><div class="compare-diff-kicker">What's different</div><p class="compare-diff">A more conservative lender with a larger, steadier loan book.</p><div class="compare-h2h"><div class="compare-h2h-label">Head to head</div><div class="compare-h2h-stat">ROE: <b>GTCO 24.1%</b> vs Zenith 19.8%</div></div></div>
+            <div class="compare-card-item"><div class="compare-name">UBA</div><div class="compare-diff-kicker">What's different</div><p class="compare-diff">Similar size, much larger pan-African footprint.</p><div class="compare-h2h"><div class="compare-h2h-label">Head to head</div><div class="compare-h2h-stat">Int'l revenue share: GTCO 12% vs <b>UBA 35%</b></div></div></div>
+          </div>
+          <div class="compare-seeall">See all 6 banks<i class="ti ti-arrow-right"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 2: HUB — HELD ============= -->
+  <div class="frame-block">
+    <div class="frame-label">3. Hub — Held (already own it)</div>
+    <div class="frame-note">Same page, same sections, same Compare With — only the top changes. Position note replaces the "complete picture" kicker's context, the question reframes from "should I buy" to "does this still belong," and the action row swaps to the held-position pair (Add more / Sell some or all) instead of Add to Portfolio.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text"><p class="co-name">Guaranty Trust Holding Co</p><p class="co-sector">Banking</p></div>
+        </div>
+
+        <div class="decision-card">
+          <div class="position-note"><i class="ti ti-check"></i>You hold 500 shares of GTCO at ₦38.20 avg</div>
+          <div class="dc-kicker held"><i class="ti ti-shield-check"></i>You already hold this</div>
+          <h1 class="dc-title">Does GTCO still belong in your portfolio?</h1>
+          <p class="dc-copy">Placeholder: nothing in the evidence has changed since you bought — your original reasoning still holds.</p>
+          <div class="action-row">
+            <div class="action-pair">
+              <button class="action-primary"><i class="ti ti-plus"></i>Add more</button>
+              <button class="action-secondary"><i class="ti ti-minus"></i>Sell some or all</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="qc-card">
+          <span class="qc-kicker">Quick Check</span>
+          <h2 class="qc-title">A fast look at the fundamentals.</h2>
+          <div class="qc-generated"><i class="ti ti-robot"></i>Generated automatically from public financial data.</div>
+          <div class="qc-row">
+            <div class="qc-badge strength"><i class="ti ti-check"></i></div>
+            <div><div class="qc-row-label strength">Key strength</div><div class="qc-category">Valuation</div><div class="qc-text">Trading below the sector average on price</div></div>
+          </div>
+          <div class="qc-row">
+            <div class="qc-badge watch"><i class="ti ti-alert-triangle"></i></div>
+            <div><div class="qc-row-label watch">Worth watching</div><div class="qc-category">Financial Strength</div><div class="qc-text">Capital buffer is thinner than sector peers</div></div>
+          </div>
+          <div class="qc-seeall">See full breakdown<i class="ti ti-arrow-right"></i></div>
+        </div>
+
+        <p class="section-title">Understanding this business</p>
+        <p class="section-sub">All core sections reviewed when you first invested.</p>
+        <div class="sec-list">
+          <div class="sec-item"><div class="sec-status"><i class="ti ti-check"></i></div><span class="sec-name">The Business</span><span class="sec-tag">Core</span></div>
+          <div class="sec-item"><div class="sec-status"><i class="ti ti-check"></i></div><span class="sec-name">Financial Health</span><span class="sec-tag">Core</span></div>
+          <div class="sec-item"><div class="sec-status"><i class="ti ti-check"></i></div><span class="sec-name">Valuation</span><span class="sec-tag">Core</span></div>
+          <div class="sec-item"><div class="sec-status"><i class="ti ti-check"></i></div><span class="sec-name">Risks</span><span class="sec-tag">Core</span></div>
+        </div>
+
+        <div class="section-wrap">
+          <p class="section-title">Compare With</p>
+          <p class="section-sub">Worth knowing what else is out there.</p>
+          <div class="compare-scroll">
+            <div class="compare-card-item"><div class="compare-name">Zenith Bank</div><div class="compare-diff-kicker">What's different</div><p class="compare-diff">A more conservative lender with a larger, steadier loan book.</p><div class="compare-h2h"><div class="compare-h2h-label">Head to head</div><div class="compare-h2h-stat">ROE: <b>GTCO 24.1%</b> vs Zenith 19.8%</div></div></div>
+          </div>
+          <div class="compare-seeall">See all 6 banks<i class="ti ti-arrow-right"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-heading"><h2>Section Detail</h2><p>One reusable template — same structure across The Business, Financial Health, Valuation, and Risks. Each section states the question it's answering, shows the metric(s) that answer it head-to-head against the sector, then a plain-English read of what that means. Two live examples below; The Business and Risks follow the identical shape with different content.</p></div>
+
+  <!-- ============= FRAME 3: SECTION DETAIL — FINANCIAL HEALTH ============= -->
+  <div class="frame-block">
+    <div class="frame-label">4. Section Detail — Financial Health</div>
+    <div class="frame-note">Revenue Growth is its own metric pair, giving "Revenue growth vs. sector" (a Quick Check criterion) a real evidence source rather than an implied one.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-id-text"><p class="co-name">Financial Health</p><p class="co-sector">Guaranty Trust Holding Co</p></div>
+        </div>
+        <div class="ev-block">
+          <p class="ev-question">Is revenue growing faster or slower than the sector?</p>
+          <div class="metric-pair">
+            <div class="metric-box"><div class="metric-label">Revenue Growth (3yr)</div><div class="metric-value">+12.4%</div><div class="metric-qualifier high">Above sector</div></div>
+            <div class="metric-box"><div class="metric-label">Sector Avg Growth</div><div class="metric-value">+8.1%</div></div>
+          </div>
+          <p class="insight-line">Growing meaningfully faster than the sector as a whole — <b>worth understanding whether that's sustainable</b> or a one-off.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 4: SECTION DETAIL — VALUATION ============= -->
+  <div class="frame-block">
+    <div class="frame-label">5. Section Detail — Valuation</div>
+    <div class="frame-note">"Consistent dividend history" is about years paid, not current yield — a different fact from the yield-vs-sector metric already shown, so it gets its own line rather than being conflated with it.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-id-text"><p class="co-name">Valuation</p><p class="co-sector">Guaranty Trust Holding Co</p></div>
+        </div>
+        <div class="ev-block">
+          <p class="ev-question">How does the price compare to earnings and to what it pays out?</p>
+          <div class="metric-pair">
+            <div class="metric-box"><div class="metric-label">P/E Ratio</div><div class="metric-value">6.2x</div><div class="metric-qualifier high">Below sector</div></div>
+            <div class="metric-box"><div class="metric-label">Dividend Yield</div><div class="metric-value">5.8%</div><div class="metric-qualifier high">Above sector</div></div>
+          </div>
+          <p class="insight-line">Trading below the sector average while paying a higher dividend yield.</p>
+          <div class="dividend-note"><b>Dividend history:</b> paid every year for 8 consecutive years, including through the 2020 downturn.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-heading"><h2>Quick Check — full breakdown</h2><p>Its own screen, reached via "See full breakdown" from the Hub — not a bloated Hub section. All 6 categories, all 12 criteria, no summary number attached. Most rows jump to the section evidence behind them; the governance-flags row is different by nature (a screening check, not a comparative metric) so it expands inline instead.</p></div>
+
+  <!-- ============= FRAME 5: QUICK CHECK — FULL BREAKDOWN ============= -->
+  <div class="frame-block">
+    <div class="frame-label">6. "See full breakdown" screen</div>
+    <div class="frame-note">No tally attached to the list — just the categorized 12 criteria. Tap any comparative row to jump to the section evidence behind it. The governance row is tagged "Check" instead of getting a chevron, and expands in place to show what was actually checked.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-id-text"><p class="co-name">Quick Check</p><p class="co-sector">Guaranty Trust Holding Co</p></div>
+        </div>
+        <h1 class="fb-title">A fast look at the fundamentals.</h1>
+        <p class="fb-sub">Generated automatically from public financial data — this is a summary of evidence, not a recommendation. Tap any row to see the number behind it.</p>
+
+        <div class="fb-group">
+          <div class="fb-group-title">Profitability</div>
+          <div class="fb-item"><div class="fb-icon met"><i class="ti ti-check"></i></div><span class="fb-text">3-year profit growth</span><i class="ti ti-chevron-right fb-chevron"></i></div>
+          <div class="fb-item"><div class="fb-icon met"><i class="ti ti-check"></i></div><span class="fb-text">Stable margins</span><i class="ti ti-chevron-right fb-chevron"></i></div>
+        </div>
+        <div class="fb-group">
+          <div class="fb-group-title">Financial Strength</div>
+          <div class="fb-item"><div class="fb-icon notmet"><i class="ti ti-minus"></i></div><span class="fb-text">Capital buffer vs. sector</span><i class="ti ti-chevron-right fb-chevron"></i></div>
+          <div class="fb-item"><div class="fb-icon met"><i class="ti ti-check"></i></div><span class="fb-text">Falling NPL ratio</span><i class="ti ti-chevron-right fb-chevron"></i></div>
+        </div>
+        <div class="fb-group">
+          <div class="fb-group-title">Valuation</div>
+          <div class="fb-item"><div class="fb-icon met"><i class="ti ti-check"></i></div><span class="fb-text">Price below sector average</span><i class="ti ti-chevron-right fb-chevron"></i></div>
+          <div class="fb-item"><div class="fb-icon met"><i class="ti ti-check"></i></div><span class="fb-text">Dividend yield above sector</span><i class="ti ti-chevron-right fb-chevron"></i></div>
+        </div>
+        <div class="fb-group">
+          <div class="fb-group-title">Growth</div>
+          <div class="fb-item"><div class="fb-icon met"><i class="ti ti-check"></i></div><span class="fb-text">Revenue growth vs. sector</span><i class="ti ti-chevron-right fb-chevron"></i></div>
+          <div class="fb-item"><div class="fb-icon notmet"><i class="ti ti-minus"></i></div><span class="fb-text">New segment growth pace</span><i class="ti ti-chevron-right fb-chevron"></i></div>
+        </div>
+        <div class="fb-group">
+          <div class="fb-group-title">Management &amp; Capital Allocation</div>
+          <div class="fb-item"><div class="fb-icon met"><i class="ti ti-check"></i></div><span class="fb-text">Consistent dividend history</span><i class="ti ti-chevron-right fb-chevron"></i></div>
+          <div class="fb-item"><div class="fb-icon met"><i class="ti ti-check"></i></div><span class="fb-text">ROE above sector average</span><i class="ti ti-chevron-right fb-chevron"></i></div>
+        </div>
+        <div class="fb-group">
+          <div class="fb-group-title">Risk</div>
+          <div class="fb-item"><div class="fb-icon met"><i class="ti ti-check"></i></div><span class="fb-text">Manageable sector concentration</span><i class="ti ti-chevron-right fb-chevron"></i></div>
+          <div class="fb-item"><div class="fb-icon met"><i class="ti ti-check"></i></div><span class="fb-text">No major governance flags</span><span class="fb-icon-type">Check</span></div>
+          <div class="fb-inline-panel"><b>What we checked:</b> NGX and SEC filings for regulatory sanctions, related-party transaction disclosures, and board/audit controversies in the last 3 years. None found as of this analysis.</div>
+        </div>
+        <div class="fb-disclaimer">Two criteria unmet doesn't mean "don't invest" — it means those are worth weighing carefully yourself.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-heading"><h2>Compare With — peer breakdown</h2><p>Reached by tapping a Compare With card, curated or from "See all N banks." A focused side-by-side, not a jump straight into the peer's own analysis — this is where Compare With actually delivers its value, with no declared "winner."</p></div>
+
+  <!-- ============= FRAME 6: COMPARE WITH — PEER BREAKDOWN ============= -->
+  <div class="frame-block">
+    <div class="frame-label">7. Peer comparison breakdown screen</div>
+    <div class="frame-note">Metrics sit side by side with no verdict — the better figure per row is simply highlighted, letting the user weigh what matters to them. A link at the bottom still offers the full switch-over into the peer's own analysis for anyone who wants to go deeper.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+        </div>
+        <div class="bd-header">
+          <div class="bd-vs-row">
+            <div class="bd-co"><div class="co-mark">GT</div><span class="bd-co-name">GTCO</span></div>
+            <span class="bd-vs">vs</span>
+            <div class="bd-co"><div class="co-mark" style="background:#0B5F7F;">ZB</div><span class="bd-co-name">Zenith Bank</span></div>
+          </div>
+          <p class="bd-diff-line">A more conservative lender with a larger, steadier loan book.</p>
+        </div>
+
+        <table class="bd-table">
+          <tr><th>Metric</th><th>GTCO</th><th>Zenith</th></tr>
+          <tr><td>ROE</td><td class="better">24.1%</td><td>19.8%</td></tr>
+          <tr><td>P/E</td><td class="better">6.2x</td><td>7.9x</td></tr>
+          <tr><td>NPL Ratio</td><td>3.6%</td><td class="better">3.1%</td></tr>
+          <tr><td>Dividend Yield</td><td class="better">5.8%</td><td>4.9%</td></tr>
+          <tr><td>Capital Adequacy</td><td>15.2%</td><td class="better">18.4%</td></tr>
+        </table>
+
+        <div class="bd-full-link"><i class="ti ti-arrow-right"></i>See Zenith's full analysis</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-heading"><h2>Buy sheet</h2><p>Reached from "Add to Portfolio" (not held) or "Add more" (held). Segmented tabs keep both modes visible at all times, so switching between them is obvious rather than hidden behind a toggle.</p></div>
+
+  <!-- ============= FRAME 7: BUY SHEET — PLAN A PURCHASE ============= -->
+  <div class="frame-block">
+    <div class="frame-label">8. Plan a purchase (tab)</div>
+    <div class="frame-note">See what you'd get for what you want to spend before heading to a broker to actually buy — plain-English labels, no jargon leaking through from internal names ("planner"/"recorder").</div>
+    <div class="device with-sheet">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text"><p class="co-name">Guaranty Trust Holding Co</p><p class="co-sector">Banking</p></div>
+        </div>
+        <div class="decision-card">
+          <div class="dc-kicker"><i class="ti ti-circle-check"></i>Complete picture</div>
+          <h1 class="dc-title">Here's what the evidence shows.</h1>
+        </div>
+      </div>
+      <div class="sheet-scrim"></div>
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="seg-tabs">
+          <div class="seg-tab active">Plan a purchase</div>
+          <div class="seg-tab">Log what I bought</div>
+        </div>
+        <h2 class="sheet-title">Plan your GTCO purchase</h2>
+        <p class="sheet-sub">See what you'd get for what you want to spend, then head to your broker to actually buy.</p>
+
+        <div class="form-field">
+          <label class="form-label">How much do you want to invest?</label>
+          <input class="form-input" placeholder="e.g. ₦50,000" value="₦50,000" />
+        </div>
+        <div class="form-field">
+          <label class="form-label">Current price <span class="form-hint-inline">Market close, today</span></label>
+          <input class="form-input filled" value="₦42.50" />
+        </div>
+
+        <div class="calc-block">
+          <div class="calc-row"><span class="calc-label">You'd get</span><span class="calc-value">~1,176 shares</span></div>
+          <div class="calc-row"><span class="calc-label">At an average of</span><span class="calc-value small">₦42.50 per share</span></div>
+          <div class="impact-note">This would be about <b>8% of your portfolio</b> — a meaningful position but not a concentrated one.</div>
+        </div>
+
+        <button class="form-submit"><i class="ti ti-external-link"></i>Ready — open my broker</button>
+        <div class="form-hint">Once you've bought, come back and switch to "Log what I bought."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 8: BUY SHEET — LOG WHAT I BOUGHT ============= -->
+  <div class="frame-block">
+    <div class="frame-label">9. Log what I bought (tab)</div>
+    <div class="frame-note">Same sheet, right tab active. One-tap switch between planning and logging — no hidden state, no interpretive burden on the user.</div>
+    <div class="device with-sheet">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text"><p class="co-name">Guaranty Trust Holding Co</p><p class="co-sector">Banking</p></div>
+        </div>
+        <div class="decision-card">
+          <div class="dc-kicker"><i class="ti ti-circle-check"></i>Complete picture</div>
+          <h1 class="dc-title">Here's what the evidence shows.</h1>
+        </div>
+      </div>
+      <div class="sheet-scrim"></div>
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="seg-tabs">
+          <div class="seg-tab">Plan a purchase</div>
+          <div class="seg-tab active">Log what I bought</div>
+        </div>
+        <h2 class="sheet-title">Log your GTCO purchase</h2>
+        <p class="sheet-sub">Just enough to keep your Portfolio in sync with what you actually own.</p>
+
+        <div class="form-field">
+          <label class="form-label">How many shares?</label>
+          <input class="form-input" placeholder="e.g. 100" />
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label">Average price paid (₦) <span class="form-hint-inline">Market close</span></label>
+            <input class="form-input filled" value="₦42.50" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">When?</label>
+            <input class="form-input" value="Today" />
+          </div>
+        </div>
+
+        <button class="form-submit">Add to Portfolio<i class="ti ti-check"></i></button>
+        <div class="form-hint">Price is pre-filled from today's close — adjust to whatever your broker actually charged.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-heading"><h2>Sell sheet</h2><p>Reached from "Sell some or all" on a held position's Hub. Mirrors the buy sheet's Plan/Log tab pattern — the Log tab is shown below since that's where a sale is actually recorded.</p></div>
+
+  <!-- ============= FRAME 9: SELL SHEET ============= -->
+  <div class="frame-block">
+    <div class="frame-label">10. Sell some or all of a position (Log tab)</div>
+    <div class="frame-note">Quick picks (25% / 50% / 75% / All) let common cases resolve in one tap; specific-quantity input covers anything else. Shows realized gain/loss inline — factual, not celebratory.</div>
+    <div class="device with-sheet">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text"><p class="co-name">Guaranty Trust Holding Co</p><p class="co-sector">Banking</p></div>
+        </div>
+        <div class="decision-card">
+          <div class="position-note"><i class="ti ti-check"></i>You hold 500 shares of GTCO at ₦38.20 avg</div>
+          <div class="dc-kicker"><i class="ti ti-circle-check"></i>Complete picture</div>
+          <h1 class="dc-title">Here's what the evidence shows.</h1>
+          <div class="action-row">
+            <button class="action-primary"><i class="ti ti-plus"></i>Add more</button>
+            <button class="action-primary action-secondary"><i class="ti ti-minus"></i>Sell some or all</button>
+          </div>
+        </div>
+      </div>
+      <div class="sheet-scrim"></div>
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="seg-tabs">
+          <div class="seg-tab">Plan a sale</div>
+          <div class="seg-tab active">Log a sale</div>
+        </div>
+        <h2 class="sheet-title">Log your GTCO sale</h2>
+        <p class="sheet-sub">You held 500 shares at ₦38.20 average. How much did you sell?</p>
+
+        <div class="form-field">
+          <label class="form-label">How many shares did you sell?</label>
+          <div class="sell-picks">
+            <div class="sell-pick">25% (125)</div>
+            <div class="sell-pick selected">50% (250)</div>
+            <div class="sell-pick">75% (375)</div>
+            <div class="sell-pick">All (500)</div>
+          </div>
+          <input class="form-input" placeholder="Or type a specific number" value="250" />
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label">Average price sold at (₦) <span class="form-hint-inline">Market close</span></label>
+            <input class="form-input filled" value="₦42.50" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">When?</label>
+            <input class="form-input" value="Today" />
+          </div>
+        </div>
+
+        <div class="calc-block">
+          <div class="calc-row"><span class="calc-label">Realized proceeds</span><span class="calc-value">₦10,625</span></div>
+          <div class="calc-row"><span class="calc-label">Cost basis of sold shares</span><span class="calc-value small">₦9,550</span></div>
+          <div class="calc-row"><span class="calc-label">Realized gain/loss</span><span class="calc-value gain">+₦1,075</span></div>
+          <div class="impact-note">You'd still hold <b>250 shares</b> after this — position size drops from 8% to about 4% of your portfolio.</div>
+        </div>
+
+        <button class="form-submit">Record sale<i class="ti ti-check"></i></button>
+        <div class="form-hint">Real prices vary — adjust to match what your broker actually paid you.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-heading"><h2>Pass-reasoning sheet</h2><p>Reached from "Save my reasoning and pass" on a not-yet-invested Hub.</p></div>
+
+  <!-- ============= FRAME 10: PASS-REASONING SHEET ============= -->
+  <div class="frame-block">
+    <div class="frame-label">11. "Save my reasoning and pass" — skippable</div>
+    <div class="frame-note">A "Skip — just record my pass" link at the bottom means the user can register the pass without writing anything. Decision Journal gets the fact of a pass either way, reasoning captured only if given. Never a wall.</div>
+    <div class="device with-sheet">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text"><p class="co-name">Guaranty Trust Holding Co</p><p class="co-sector">Banking</p></div>
+        </div>
+        <div class="decision-card">
+          <div class="dc-kicker"><i class="ti ti-circle-check"></i>Complete picture</div>
+          <h1 class="dc-title">Here's what the evidence shows.</h1>
+        </div>
+      </div>
+      <div class="sheet-scrim"></div>
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <h2 class="sheet-title">Save your reasoning</h2>
+        <p class="sheet-sub">Deciding not to invest is a real decision too. A short note now makes it easier to remember why later — or skip it entirely.</p>
+
+        <div class="form-field">
+          <label class="form-label">What led you to pass?</label>
+          <div class="quick-reasons">
+            <div class="quick-reason selected">Valuation feels stretched</div>
+            <div class="quick-reason">Not enough conviction yet</div>
+            <div class="quick-reason">Prefer to compare with peers</div>
+            <div class="quick-reason">Risks concern me</div>
+            <div class="quick-reason">Not right for my portfolio</div>
+          </div>
+          <textarea class="textarea-input" placeholder="Add your own words (optional)&#10;&#10;e.g. 'Solid business but the multiple is too rich for me right now.'"></textarea>
+        </div>
+
+        <button class="form-submit">Save to Decision Journal<i class="ti ti-check"></i></button>
+        <a class="skip-link">Skip — just record my pass</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

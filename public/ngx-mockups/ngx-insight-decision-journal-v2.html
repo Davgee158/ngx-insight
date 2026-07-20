@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NGX Insight — Decision Journal v2: reasoning not memories</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+  :root{
+    --ink:#14181C; --ink-soft:#4B5158; --ink-mute:#8A8F94;
+    --page:#F5F5F1; --surface:#FFFFFF; --surface-tint:#EFF1EC; --border:#E4E3DA;
+    --indigo:#5A54C4; --indigo-tint:#ECEAFA; --indigo-deep:#332F86;
+    --green:#1E8E5A; --green-tint:#E6F4EC; --red:#B75151;
+    --radius-lg:24px; --radius-md:18px; --radius-sm:12px;
+    --shadow-hero: 0 2px 4px rgba(20,24,28,0.04), 0 14px 32px rgba(20,24,28,0.08);
+    --shadow-card: 0 1px 2px rgba(20,24,28,0.03), 0 6px 18px rgba(20,24,28,0.05);
+    --shadow-sheet: 0 -8px 32px rgba(20,24,28,0.18);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#DCDCD5;font-family:'Inter',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding:40px;}
+  .frames{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .frame-block{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .frame-label{font-size:13px;font-weight:500;color:var(--ink-soft);background:var(--surface);border:1px solid var(--border);padding:6px 14px;border-radius:999px;}
+  .frame-note{max-width:393px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;background:var(--surface);border:1px dashed var(--border);padding:10px 14px;border-radius:12px;}
+  .frame-note b{color:var(--ink);}
+  .device{width:393px;height:852px;background:var(--page);border-radius:52px;border:1px solid #C9C9C1;box-shadow:0 30px 60px rgba(0,0,0,0.18);overflow:hidden;position:relative;display:flex;flex-direction:column;}
+  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#000;border-radius:16px;z-index:30;}
+  .scroll{flex:1;overflow-y:auto;padding:60px 20px 40px;position:relative;}
+  .scroll::-webkit-scrollbar{display:none;}
+  .device.with-sheet .scroll{overflow:hidden;}
+  .sheet-scrim{position:absolute;inset:0;background:rgba(20,24,28,0.4);z-index:15;}
+
+  .page-header{margin-bottom:6px;}
+  .page-kicker{font-size:11px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:4px;}
+  .page-title{font-family:'Fraunces',serif;font-size:24px;font-weight:500;letter-spacing:-0.015em;line-height:1.2;margin:0;}
+  .page-purpose{font-size:12px;color:var(--ink-mute);line-height:1.5;margin:8px 0 20px;}
+
+  .month-label{font-size:11.5px;font-weight:600;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.03em;margin:20px 0 12px;}
+  .month-label:first-child{margin-top:0;}
+  .entry{display:flex;gap:13px;margin-bottom:14px;}
+  .entry-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .entry-icon.buy{background:var(--green-tint);color:#0E5A3A;}
+  .entry-icon.sell{background:var(--surface-tint);color:var(--ink-soft);}
+  .entry-icon.pass{background:var(--surface-tint);color:var(--ink-mute);}
+  .entry-icon i{font-size:15px;}
+  .entry-card{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;box-shadow:var(--shadow-card);}
+  .entry-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;}
+  .entry-title{font-size:13.5px;font-weight:600;color:var(--ink);}
+  .entry-date{font-size:10.5px;color:var(--ink-mute);}
+  .entry-fact{font-size:12px;color:var(--ink-soft);line-height:1.4;}
+  .entry-fact b{color:var(--ink);font-weight:500;}
+
+  /* Evidence snapshot on buy entries — replaces "sections reviewed" */
+  .evidence-snapshot{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);}
+  .evidence-snapshot-label{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.02em;color:var(--ink-mute);margin-bottom:7px;display:flex;align-items:center;gap:7px;}
+  .version-tag{font-size:9px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--indigo-deep);background:var(--indigo-tint);padding:2px 6px;border-radius:5px;}
+
+  .no-snapshot-note{display:flex;gap:8px;font-size:11.5px;color:var(--ink-soft);line-height:1.5;margin-top:10px;padding:10px 12px;background:var(--surface-tint);border-radius:10px;}
+  .no-snapshot-note i{font-size:14px;color:var(--ink-mute);flex-shrink:0;margin-top:1px;}
+
+  /* Dual-date structural display — replaces the arbitrary grace window */
+  .entry-dates-row{display:flex;gap:16px;margin-bottom:8px;}
+  .entry-date-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.02em;color:var(--ink-mute);margin-bottom:2px;}
+  .entry-date-value{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);font-weight:600;}
+
+  .your-reason-block{margin-top:10px;padding:10px 12px;background:var(--indigo-tint);border-radius:10px;}
+  .your-reason-label{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.02em;color:var(--indigo-deep);margin-bottom:4px;}
+  .your-reason-text{font-size:12px;color:var(--ink);font-style:italic;line-height:1.5;}
+
+  .corrected-tag{font-size:9px;font-weight:600;text-transform:uppercase;color:var(--amber);background:var(--amber-tint);padding:2px 6px;border-radius:5px;margin-left:6px;}
+  .date-mismatch-note{display:flex;gap:8px;font-size:11px;color:var(--ink-soft);line-height:1.5;margin-top:10px;padding:10px 12px;background:var(--amber-tint);border-radius:10px;}
+  .date-mismatch-note i{font-size:14px;color:var(--amber);flex-shrink:0;margin-top:1px;}
+  .evidence-row{display:flex;align-items:flex-start;gap:7px;margin-bottom:5px;}
+  .evidence-row i{font-size:12px;margin-top:1px;flex-shrink:0;}
+  .evidence-row.strength i{color:#0E5A3A;}
+  .evidence-row.watch i{color:var(--red);}
+  .evidence-text{font-size:12px;color:var(--ink);}
+
+  .reason-chip{display:inline-block;font-size:10.5px;font-weight:500;color:var(--indigo-deep);background:var(--indigo-tint);padding:3px 8px;border-radius:999px;margin-top:8px;}
+  .reason-note{font-size:12px;color:var(--ink-soft);font-style:italic;line-height:1.5;margin-top:6px;}
+  .no-reason-note{font-size:11px;color:var(--ink-mute);margin-top:8px;font-style:italic;}
+
+  /* Buy doorway — plain, no comparison */
+  .doorway{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);}
+  .doorway-label{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.02em;color:var(--ink-mute);margin-bottom:4px;}
+  .doorway-fact{font-size:12px;color:var(--ink-soft);margin-bottom:8px;}
+  .doorway-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--indigo-deep);}
+  .doorway-link i{font-size:13px;}
+
+  /* Pass "since then" comparison — kept, unlike the buy doorway */
+  .changed-panel{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);}
+  .changed-label{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.02em;color:var(--ink-mute);margin-bottom:5px;}
+  .changed-fact{font-size:12.5px;color:var(--ink);line-height:1.5;margin-bottom:10px;}
+  .changed-fact b{font-weight:600;}
+  .revisit-link{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:#fff;background:var(--ink);padding:9px 14px;border-radius:var(--radius-sm);}
+  .revisit-link i{font-size:13px;}
+
+  /* Sparse-state framing */
+  .sparse-note{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;margin-top:24px;text-align:center;}
+  .sparse-note-text{font-size:12px;color:var(--ink-mute);line-height:1.5;}
+
+  /* Sell reason sheet */
+  .sheet{position:absolute;bottom:0;left:0;right:0;background:var(--surface);border-radius:24px 24px 0 0;padding:16px 20px 24px;box-shadow:var(--shadow-sheet);z-index:20;max-height:75%;overflow-y:auto;}
+  .sheet::-webkit-scrollbar{display:none;}
+  .sheet-handle{width:36px;height:4px;background:var(--border);border-radius:999px;margin:0 auto 16px;}
+  .sheet-title{font-family:'Fraunces',serif;font-size:18px;font-weight:500;letter-spacing:-0.01em;margin:0 0 4px;}
+  .sheet-sub{font-size:12.5px;color:var(--ink-mute);margin:0 0 16px;line-height:1.5;}
+  .quick-reasons{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .quick-reason{font-size:11.5px;padding:7px 11px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--ink-soft);cursor:pointer;}
+  .quick-reason.selected{background:var(--indigo-tint);border-color:transparent;color:var(--indigo-deep);}
+  .textarea-input{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);background:var(--surface);resize:none;min-height:70px;line-height:1.5;}
+  .form-submit{width:100%;padding:13px;background:var(--ink);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .skip-link{display:block;text-align:center;font-size:12px;color:var(--ink-mute);margin-top:10px;text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<div class="frames">
+
+  <!-- ============= FRAME 1: BUY ENTRY — EVIDENCE SNAPSHOT, NOT TRANSACTION RECORD ============= -->
+  <div class="frame-block">
+    <div class="frame-label">1. Buy entry — evidence snapshot replaces "sections reviewed"</div>
+    <div class="frame-note">This is the fix. Old version said "reviewed 4 sections" — a completion log, not reasoning. New version freezes the actual Quick Check state <b>at the moment of purchase</b>: the key strength and the thing worth watching, exactly as they appeared that day. This is "what convinced them," without needing the deferred reflection feature.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="page-header"><div class="page-kicker">Decision Journal</div><h1 class="page-title">Your decisions.</h1></div>
+        <p class="page-purpose">Not what you own — why you decided.</p>
+
+        <div class="entry">
+          <div class="entry-icon buy"><i class="ti ti-plus"></i></div>
+          <div class="entry-card">
+            <div class="entry-top"><span class="entry-title">Bought GTCO</span><span class="entry-date">Jul 3</span></div>
+            <div class="entry-fact">1,200 shares at ₦38.20</div>
+            <div class="evidence-snapshot">
+              <div class="evidence-snapshot-label">The evidence, at the time</div>
+              <div class="evidence-row strength"><i class="ti ti-check"></i><span class="evidence-text">Trading below the sector average on price</span></div>
+              <div class="evidence-row watch"><i class="ti ti-alert-triangle"></i><span class="evidence-text">Capital buffer thinner than sector peers</span></div>
+            </div>
+            <div class="doorway">
+              <div class="doorway-label">Current status</div>
+              <div class="doorway-fact">You still own this investment.</div>
+              <div class="doorway-link"><i class="ti ti-arrow-right"></i>Open current analysis</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 1B: PASS ENTRY — LIVE COMPARISON STAYS ============= -->
+  <div class="frame-block">
+    <div class="frame-label">1b. Pass entry — the asymmetry, confirmed</div>
+    <div class="frame-note">Buy = frozen evidence + a plain doorway, nothing more, because a buy is <b>finished</b> \u2014 there's no open question left for the journal to answer. Pass = frozen evidence + a live comparison, because a pass is <b>unfinished</b> \u2014 "is it still worth passing" is a real, current question. Same journal, two different endings, on purpose.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="page-header"><div class="page-kicker">Decision Journal</div><h1 class="page-title">Your decisions.</h1></div>
+        <div class="entry">
+          <div class="entry-icon pass"><i class="ti ti-x"></i></div>
+          <div class="entry-card">
+            <div class="entry-top"><span class="entry-title">Passed on Seplat Energy</span><span class="entry-date">Jul 12</span></div>
+            <div class="reason-chip">Valuation feels stretched</div>
+            <div class="reason-note">"Solid business but the multiple is too rich for me right now."</div>
+            <div class="changed-panel">
+              <div class="changed-label">Since then</div>
+              <div class="changed-fact">P/E has moved from <b>9.8x to 7.4x</b>, now below the sector average. Nothing else about the business has changed.</div>
+              <div class="revisit-link"><i class="ti ti-arrow-right"></i>Revisit Seplat Energy</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 2: SELL WITH REASON (NEW UPSTREAM CAPTURE) ============= -->
+  <div class="frame-block">
+    <div class="frame-label">2. Sell reason sheet — the missing upstream piece</div>
+    <div class="frame-note">Company Analysis's sell flow never asked why. Fixed here: quick-tap reasons plus an optional note, skippable exactly like the pass sheet \u2014 same pattern, same discipline, just applied to the decision that was missing it.</div>
+    <div class="device with-sheet">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="page-header"><div class="page-kicker">Decision Journal</div><h1 class="page-title">Your decisions.</h1></div>
+      </div>
+      <div class="sheet-scrim"></div>
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <h2 class="sheet-title">Why are you selling?</h2>
+        <p class="sheet-sub">Totally optional — helps you remember later.</p>
+        <div class="quick-reasons">
+          <div class="quick-reason selected">Took profits</div>
+          <div class="quick-reason">Lost conviction</div>
+          <div class="quick-reason">Needed the cash</div>
+          <div class="quick-reason">Valuation now looks stretched</div>
+          <div class="quick-reason">Rebalancing</div>
+        </div>
+        <textarea class="textarea-input" placeholder="Add your own words (optional)"></textarea>
+        <button class="form-submit">Confirm sale<i class="ti ti-check"></i></button>
+        <a class="skip-link">Skip — just record the sale</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 3: SPARSE STATE — TREATED AS COMPLETE, NOT EMPTY ============= -->
+  <div class="frame-block">
+    <div class="frame-label">3. Two entries after three months — this is fine</div>
+    <div class="frame-note">No filler, no "add more to see insights" nudge, no artificial padding. A small quiet line at the bottom does the only reassurance needed \u2014 confirming sparse is working as intended, not broken.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="page-header"><div class="page-kicker">Decision Journal</div><h1 class="page-title">Your decisions.</h1></div>
+        <p class="page-purpose">Not what you own — why you decided.</p>
+
+        <div class="month-label">July 2026</div>
+        <div class="entry">
+          <div class="entry-icon buy"><i class="ti ti-plus"></i></div>
+          <div class="entry-card">
+            <div class="entry-top"><span class="entry-title">Bought GTCO</span><span class="entry-date">Jul 3</span></div>
+            <div class="entry-fact">1,200 shares at ₦38.20</div>
+            <div class="evidence-snapshot">
+              <div class="evidence-snapshot-label">The evidence, at the time</div>
+              <div class="evidence-row strength"><i class="ti ti-check"></i><span class="evidence-text">Trading below the sector average on price</span></div>
+              <div class="evidence-row watch"><i class="ti ti-alert-triangle"></i><span class="evidence-text">Capital buffer thinner than sector peers</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="month-label">May 2026</div>
+        <div class="entry">
+          <div class="entry-icon pass"><i class="ti ti-x"></i></div>
+          <div class="entry-card">
+            <div class="entry-top"><span class="entry-title">Passed on Zenith Bank</span><span class="entry-date">May 22</span></div>
+            <div class="reason-chip">Prefer to compare with peers</div>
+            <div class="no-reason-note">No additional note was added.</div>
+          </div>
+        </div>
+
+        <div class="sparse-note">
+          <div class="sparse-note-text">Two decisions in three months. Investing well doesn't mean deciding often — this is what a calm, deliberate pace looks like here.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 4: FRAMEWORK VERSIONING ============= -->
+  <div class="frame-block">
+    <div class="frame-label">4. An old entry, evaluated under an earlier Quick Check</div>
+    <div class="frame-note">Three criteria instead of today's six categories — not broken, not incomplete, just <b>Quick Check v1</b>. The tag is stated plainly so it reads as historical context, never as a bug or a gap.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="page-header"><div class="page-kicker">Decision Journal</div><h1 class="page-title">Your decisions.</h1></div>
+        <div class="entry">
+          <div class="entry-icon buy"><i class="ti ti-plus"></i></div>
+          <div class="entry-card">
+            <div class="entry-top"><span class="entry-title">Bought Zenith Bank</span><span class="entry-date">Aug 2024</span></div>
+            <div class="entry-fact">400 shares at ₦29.10</div>
+            <div class="evidence-snapshot">
+              <div class="evidence-snapshot-label">The evidence, at the time <span class="version-tag">Quick Check v1</span></div>
+              <div class="evidence-row strength"><i class="ti ti-check"></i><span class="evidence-text">Revenue growing steadily</span></div>
+              <div class="evidence-row strength"><i class="ti ti-check"></i><span class="evidence-text">ROE above sector average</span></div>
+              <div class="evidence-row strength"><i class="ti ti-check"></i><span class="evidence-text">Consistent dividend</span></div>
+            </div>
+            <div class="doorway">
+              <div class="doorway-label">Current status</div>
+              <div class="doorway-fact">You still own this investment.</div>
+              <div class="doorway-link"><i class="ti ti-arrow-right"></i>Open current analysis</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 5: NO ARBITRARY THRESHOLD — LOGGING-TIME SNAPSHOT, DUAL DATES ============= -->
+  <div class="frame-block">
+    <div class="frame-label">5. Fixed — no grace window, snapshot always tied to logging time</div>
+    <div class="frame-note">No arbitrary "too many days" cutoff anymore. The snapshot is <b>always</b> real data captured at the moment of logging — never claimed to be from the purchase date. When the two dates differ, both are shown as structural facts side by side, not a skippable footnote. The mismatch is self-evident from the layout itself.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="page-header"><div class="page-kicker">Decision Journal</div><h1 class="page-title">Your decisions.</h1></div>
+        <div class="entry">
+          <div class="entry-icon buy"><i class="ti ti-plus"></i></div>
+          <div class="entry-card">
+            <div class="entry-dates-row">
+              <div class="entry-date-block"><div class="entry-date-label">Purchased</div><div class="entry-date-value">Apr 15</div></div>
+              <div class="entry-date-block"><div class="entry-date-label">Added</div><div class="entry-date-value">Jul 10</div></div>
+            </div>
+            <div class="entry-top"><span class="entry-title">Bought Access Holdings</span></div>
+            <div class="entry-fact">600 shares at ₦24.80</div>
+            <div class="evidence-snapshot">
+              <div class="evidence-snapshot-label">What the data showed, as of Jul 10 <span class="version-tag">Quick Check v2</span></div>
+              <div class="evidence-row strength"><i class="ti ti-check"></i><span class="evidence-text">Dividend yield above sector average</span></div>
+              <div class="evidence-row watch"><i class="ti ti-alert-triangle"></i><span class="evidence-text">Revenue growth below sector average</span></div>
+            </div>
+            <div class="doorway">
+              <div class="doorway-label">Current status</div>
+              <div class="doorway-fact">You still own this investment.</div>
+              <div class="doorway-link"><i class="ti ti-arrow-right"></i>Open current analysis</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 5B: BUY REASON — MATCHING SELL AND PASS ============= -->
+  <div class="frame-block">
+    <div class="frame-label">5b. Buy now gets an optional personal reason too</div>
+    <div class="frame-note">Same skippable pattern as Sell and Pass, closing the gap the first question exposed. "What the data showed" and "Your reason" sit clearly apart — one is ours, one is genuinely theirs.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="page-header"><div class="page-kicker">Decision Journal</div><h1 class="page-title">Your decisions.</h1></div>
+        <div class="entry">
+          <div class="entry-icon buy"><i class="ti ti-plus"></i></div>
+          <div class="entry-card">
+            <div class="entry-top"><span class="entry-title">Bought GTCO</span><span class="entry-date">Jul 3</span></div>
+            <div class="entry-fact">1,200 shares at ₦38.20</div>
+            <div class="evidence-snapshot">
+              <div class="evidence-snapshot-label">What the data showed <span class="version-tag">Quick Check v2</span></div>
+              <div class="evidence-row strength"><i class="ti ti-check"></i><span class="evidence-text">Trading below the sector average on price</span></div>
+              <div class="evidence-row watch"><i class="ti ti-alert-triangle"></i><span class="evidence-text">Capital buffer thinner than sector peers</span></div>
+            </div>
+            <div class="your-reason-block">
+              <div class="your-reason-label">Your reason</div>
+              <div class="your-reason-text">"A friend who works in banking convinced me this one's undervalued — wanted to see the numbers for myself first."</div>
+            </div>
+            <div class="doorway">
+              <div class="doorway-label">Current status</div>
+              <div class="doorway-fact">You still own this investment.</div>
+              <div class="doorway-link"><i class="ti ti-arrow-right"></i>Open current analysis</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============= FRAME 6: DATE CORRECTED AFTER THE FACT ============= -->
+  <div class="frame-block">
+    <div class="frame-label">6. Purchase date corrected — snapshot stays tied to when it was logged</div>
+    <div class="frame-note">The frozen evidence doesn't regenerate for the corrected date, because we can't reconstruct it honestly. Instead, the mismatch is disclosed plainly rather than silently ignored.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="page-header"><div class="page-kicker">Decision Journal</div><h1 class="page-title">Your decisions.</h1></div>
+        <div class="entry">
+          <div class="entry-icon buy"><i class="ti ti-plus"></i></div>
+          <div class="entry-card">
+            <div class="entry-top"><span class="entry-title">Bought GTCO</span><span class="entry-date">Jun 20 <span class="corrected-tag">Corrected</span></span></div>
+            <div class="entry-fact">1,200 shares at ₦38.20</div>
+            <div class="evidence-snapshot">
+              <div class="evidence-snapshot-label">The evidence, at the time <span class="version-tag">Quick Check v2</span></div>
+              <div class="evidence-row strength"><i class="ti ti-check"></i><span class="evidence-text">Trading below the sector average on price</span></div>
+              <div class="evidence-row watch"><i class="ti ti-alert-triangle"></i><span class="evidence-text">Capital buffer thinner than sector peers</span></div>
+            </div>
+            <div class="date-mismatch-note"><i class="ti ti-info-circle"></i>You corrected this date after adding it. The evidence above reflects Jul 3 (when you originally added this), not Jun 20.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 7: ADDING TO AN EXISTING POSITION ============= -->
+  <div class="frame-block">
+    <div class="frame-label">7. Adding to an existing position — its own entry, own evidence</div>
+    <div class="frame-note">Deliberately not merged into the original buy entry. "Added to" language (not "Bought") signals it's a follow-on decision, not a first purchase. Shows the running share count and the new average cost \u2014 reusing the "averaging up/down" language from the buy planner. Its own fresh evidence snapshot, since months passed and the picture isn't the same as the original buy.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="page-header"><div class="page-kicker">Decision Journal</div><h1 class="page-title">Your decisions.</h1></div>
+        <div class="entry">
+          <div class="entry-icon buy"><i class="ti ti-plus"></i></div>
+          <div class="entry-card">
+            <div class="entry-top"><span class="entry-title">Added to GTCO</span><span class="entry-date">Sep 14</span></div>
+            <div class="entry-fact">Bought <b>400 more shares</b> at ₦44.10 — now holding <b>1,600 shares</b>, averaging up from ₦38.20 to ₦39.65</div>
+            <div class="evidence-snapshot">
+              <div class="evidence-snapshot-label">What the data showed, as of Sep 14 <span class="version-tag">Quick Check v2</span></div>
+              <div class="evidence-row strength"><i class="ti ti-check"></i><span class="evidence-text">Capital buffer improved since your original purchase</span></div>
+              <div class="evidence-row watch"><i class="ti ti-alert-triangle"></i><span class="evidence-text">Now trading closer to sector average on price</span></div>
+            </div>
+            <div class="doorway">
+              <div class="doorway-label">Current status</div>
+              <div class="doorway-fact">You still own this investment.</div>
+              <div class="doorway-link"><i class="ti ti-arrow-right"></i>Open current analysis</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

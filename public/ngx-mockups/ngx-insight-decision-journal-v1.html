@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NGX Insight — Decision Journal v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+  :root{
+    --ink:#14181C; --ink-soft:#4B5158; --ink-mute:#8A8F94;
+    --page:#F5F5F1; --surface:#FFFFFF; --surface-tint:#EFF1EC; --border:#E4E3DA;
+    --indigo:#5A54C4; --indigo-tint:#ECEAFA; --indigo-deep:#332F86;
+    --green:#1E8E5A; --green-tint:#E6F4EC; --red:#B75151;
+    --radius-lg:24px; --radius-md:18px; --radius-sm:12px;
+    --shadow-hero: 0 2px 4px rgba(20,24,28,0.04), 0 14px 32px rgba(20,24,28,0.08);
+    --shadow-card: 0 1px 2px rgba(20,24,28,0.03), 0 6px 18px rgba(20,24,28,0.05);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#DCDCD5;font-family:'Inter',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding:40px;}
+  .frames{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .frame-block{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .frame-label{font-size:13px;font-weight:500;color:var(--ink-soft);background:var(--surface);border:1px solid var(--border);padding:6px 14px;border-radius:999px;}
+  .frame-note{max-width:393px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;background:var(--surface);border:1px dashed var(--border);padding:10px 14px;border-radius:12px;}
+  .frame-note b{color:var(--ink);}
+  .device{width:393px;height:852px;background:var(--page);border-radius:52px;border:1px solid #C9C9C1;box-shadow:0 30px 60px rgba(0,0,0,0.18);overflow:hidden;position:relative;display:flex;flex-direction:column;}
+  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#000;border-radius:16px;z-index:30;}
+  .scroll{flex:1;overflow-y:auto;padding:60px 20px 40px;}
+  .scroll::-webkit-scrollbar{display:none;}
+
+  .page-header{margin-bottom:20px;}
+  .page-kicker{font-size:11px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:4px;}
+  .page-title{font-family:'Fraunces',serif;font-size:24px;font-weight:500;letter-spacing:-0.015em;line-height:1.2;margin:0;}
+
+  /* Empty state */
+  .empty-hero{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:26px 22px;box-shadow:var(--shadow-hero);}
+  .empty-icon{width:44px;height:44px;border-radius:12px;background:var(--indigo-tint);color:var(--indigo-deep);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+  .empty-icon i{font-size:20px;}
+  .empty-title{font-family:'Fraunces',serif;font-size:20px;font-weight:500;letter-spacing:-0.015em;line-height:1.25;margin:0 0 8px;}
+  .empty-copy{font-size:13px;color:var(--ink-soft);line-height:1.55;margin:0;}
+
+  /* Timeline */
+  .timeline{position:relative;padding-left:4px;}
+  .month-label{font-size:11.5px;font-weight:600;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.03em;margin:20px 0 12px;}
+  .month-label:first-child{margin-top:0;}
+
+  .entry{display:flex;gap:13px;margin-bottom:14px;}
+  .entry-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .entry-icon.buy{background:var(--green-tint);color:#0E5A3A;}
+  .entry-icon.sell{background:var(--surface-tint);color:var(--ink-soft);}
+  .entry-icon.pass{background:var(--surface-tint);color:var(--ink-mute);}
+  .entry-icon i{font-size:15px;}
+  .entry-card{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;box-shadow:var(--shadow-card);}
+  .entry-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;}
+  .entry-title{font-size:13.5px;font-weight:600;color:var(--ink);}
+  .entry-date{font-size:10.5px;color:var(--ink-mute);}
+  .entry-fact{font-size:12px;color:var(--ink-soft);line-height:1.4;}
+  .entry-fact b{color:var(--ink);font-weight:500;}
+
+  .reason-chip{display:inline-block;font-size:10.5px;font-weight:500;color:var(--indigo-deep);background:var(--indigo-tint);padding:3px 8px;border-radius:999px;margin-top:8px;}
+  .reason-note{font-size:12px;color:var(--ink-soft);font-style:italic;line-height:1.5;margin-top:6px;}
+  .see-changed{font-size:11.5px;font-weight:500;color:var(--indigo-deep);margin-top:10px;display:flex;align-items:center;gap:4px;cursor:pointer;}
+  .see-changed i{font-size:12px;}
+
+  /* Expanded "what's changed" panel */
+  .changed-panel{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);}
+  .changed-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.02em;color:var(--ink-mute);margin-bottom:5px;}
+  .changed-fact{font-size:12.5px;color:var(--ink);line-height:1.5;margin-bottom:10px;}
+  .revisit-link{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:#fff;background:var(--ink);padding:9px 14px;border-radius:var(--radius-sm);}
+  .revisit-link i{font-size:13px;}
+</style>
+</head>
+<body>
+
+<div class="frames">
+
+  <!-- ============= FRAME 1: EMPTY STATE ============= -->
+  <div class="frame-block">
+    <div class="frame-label">1. Decision Journal — empty state</div>
+    <div class="frame-note">Same teaching-the-model discipline as Watchlist and Portfolio's empty states. No entry points needed here specifically — entries appear automatically once you buy, sell, or pass elsewhere in the app.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="page-header"><div class="page-kicker">Decision Journal</div><h1 class="page-title">Nothing recorded yet.</h1></div>
+        <div class="empty-hero">
+          <div class="empty-icon"><i class="ti ti-notebook"></i></div>
+          <h2 class="empty-title">A record of what you decided, when, and why.</h2>
+          <p class="empty-copy">Every time you buy, sell, or pass on a company, it lands here — not to grade your past decisions, just to help you remember your own reasoning.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 2: POPULATED TIMELINE ============= -->
+  <div class="frame-block">
+    <div class="frame-label">2. Populated — mixed timeline, reverse chronological</div>
+    <div class="frame-note">One continuous timeline, not segregated by type — genuinely reads like a journal. Buy/sell entries are pure fact, no invented reasoning. The pass entry has real content (quick-tap reason + note, both built already). No grading language anywhere — no "good call," no "you missed out."</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="page-header"><div class="page-kicker">Decision Journal</div><h1 class="page-title">Your decisions.</h1></div>
+
+        <div class="timeline">
+          <div class="month-label">July 2026</div>
+
+          <div class="entry">
+            <div class="entry-icon sell"><i class="ti ti-minus"></i></div>
+            <div class="entry-card">
+              <div class="entry-top"><span class="entry-title">Sold Dangote Cement</span><span class="entry-date">Jul 14</span></div>
+              <div class="entry-fact">Sold <b>250 shares</b> at ₦42.50 — realized gain <b>+₦1,075</b></div>
+              <div class="reason-chip">Took profits</div>
+            </div>
+          </div>
+
+          <div class="entry">
+            <div class="entry-icon pass"><i class="ti ti-x"></i></div>
+            <div class="entry-card">
+              <div class="entry-top"><span class="entry-title">Passed on Seplat Energy</span><span class="entry-date">Jul 12</span></div>
+              <div class="reason-chip">Valuation feels stretched</div>
+              <div class="reason-note">"Solid business but the multiple is too rich for me right now."</div>
+              <div class="see-changed">See what's changed since<i class="ti ti-chevron-down"></i></div>
+            </div>
+          </div>
+
+          <div class="entry">
+            <div class="entry-icon buy"><i class="ti ti-plus"></i></div>
+            <div class="entry-card">
+              <div class="entry-top"><span class="entry-title">Bought GTCO</span><span class="entry-date">Jul 3</span></div>
+              <div class="entry-fact">Bought <b>1,200 shares</b> at ₦38.20. Reviewed: The Business, Financial Health, Valuation, Risks.</div>
+            </div>
+          </div>
+
+          <div class="month-label">June 2026</div>
+
+          <div class="entry">
+            <div class="entry-icon pass"><i class="ti ti-x"></i></div>
+            <div class="entry-card">
+              <div class="entry-top"><span class="entry-title">Decided not to invest — Access Holdings</span><span class="entry-date">Jun 19</span></div>
+              <div class="entry-fact">Removed from Watchlist with this reason.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 3: EXPANDED "WHAT'S CHANGED SINCE" ============= -->
+  <div class="frame-block">
+    <div class="frame-label">3. Pass entry expanded — factual, no verdict</div>
+    <div class="frame-note">Same discipline as Compare With's comparison history: states what changed, offers a way back in, never tells the user what to conclude. No "you were wrong to pass" framing — the whole point is respecting the original reasoning, not grading it.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="page-header"><div class="page-kicker">Decision Journal</div><h1 class="page-title">Your decisions.</h1></div>
+        <div class="entry">
+          <div class="entry-icon pass"><i class="ti ti-x"></i></div>
+          <div class="entry-card">
+            <div class="entry-top"><span class="entry-title">Passed on Seplat Energy</span><span class="entry-date">Jul 12</span></div>
+            <div class="reason-chip">Valuation feels stretched</div>
+            <div class="reason-note">"Solid business but the multiple is too rich for me right now."</div>
+            <div class="changed-panel">
+              <div class="changed-label">Since then</div>
+              <div class="changed-fact">P/E has moved from <b>9.8x to 7.4x</b>, now below the sector average. Nothing else about the business has changed.</div>
+              <div class="revisit-link"><i class="ti ti-arrow-right"></i>Revisit Seplat Energy</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

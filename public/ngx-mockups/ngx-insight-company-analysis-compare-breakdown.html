@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NGX Insight — Quick Check refinement + Compare breakdown page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+  :root{
+    --ink:#14181C; --ink-soft:#4B5158; --ink-mute:#8A8F94;
+    --page:#F5F5F1; --surface:#FFFFFF; --surface-tint:#EFF1EC; --border:#E4E3DA;
+    --indigo:#5A54C4; --indigo-tint:#ECEAFA; --indigo-deep:#332F86;
+    --green:#1E8E5A; --green-tint:#E6F4EC;
+    --red:#B75151; --red-tint:#FBEBEB;
+    --radius-lg:24px; --radius-md:18px; --radius-sm:12px;
+    --shadow-hero: 0 2px 4px rgba(20,24,28,0.04), 0 14px 32px rgba(20,24,28,0.08);
+    --shadow-card: 0 1px 2px rgba(20,24,28,0.03), 0 6px 18px rgba(20,24,28,0.05);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#DCDCD5;font-family:'Inter',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding:40px;}
+  .frames{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .frame-block{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .frame-label{font-size:13px;font-weight:500;color:var(--ink-soft);background:var(--surface);border:1px solid var(--border);padding:6px 14px;border-radius:999px;}
+  .frame-note{max-width:393px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;background:var(--surface);border:1px dashed var(--border);padding:10px 14px;border-radius:12px;}
+  .frame-note b{color:var(--ink);}
+  .device{width:393px;height:852px;background:var(--page);border-radius:52px;border:1px solid #C9C9C1;box-shadow:0 30px 60px rgba(0,0,0,0.18);overflow:hidden;position:relative;display:flex;flex-direction:column;}
+  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#000;border-radius:16px;z-index:30;}
+  .scroll{flex:1;overflow-y:auto;padding:60px 20px 40px;}
+  .scroll::-webkit-scrollbar{display:none;}
+
+  .back-header{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+  .back-btn{width:36px;height:36px;border-radius:11px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);flex-shrink:0;}
+  .back-btn i{font-size:18px;}
+  .co-mark{width:36px;height:36px;border-radius:10px;background:var(--ink);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .co-id-text{flex:1;min-width:0;}
+  .co-name{font-family:'Fraunces',serif;font-size:16px;font-weight:500;margin:0;letter-spacing:-0.01em;}
+  .co-sector{font-size:11.5px;color:var(--ink-mute);margin:0;}
+
+  /* Quick Check — 2 items, strength + watch-out */
+  .qc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-card);margin-bottom:20px;}
+  .qc-kicker{font-size:10.5px;font-weight:500;letter-spacing:0.03em;text-transform:uppercase;color:var(--ink-mute);}
+  .qc-title{font-family:'Fraunces',serif;font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:4px 0 4px;}
+  .qc-generated{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-mute);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--surface-tint);}
+  .qc-generated i{font-size:12px;color:var(--indigo-deep);}
+  .qc-row{display:flex;align-items:flex-start;gap:11px;padding:11px 0;}
+  .qc-row + .qc-row{border-top:1px solid var(--surface-tint);}
+  .qc-badge{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .qc-badge.strength{background:var(--green-tint);color:#0E5A3A;}
+  .qc-badge.watch{background:var(--red-tint);color:var(--red);}
+  .qc-badge i{font-size:14px;}
+  .qc-row-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.02em;margin-bottom:2px;}
+  .qc-row-label.strength{color:#0E5A3A;}
+  .qc-row-label.watch{color:var(--red);}
+  .qc-category{font-size:10px;color:var(--ink-mute);margin-bottom:1px;}
+  .qc-text{font-size:13px;color:var(--ink);font-weight:500;}
+  .qc-seeall{display:flex;align-items:center;justify-content:center;gap:5px;font-size:12.5px;font-weight:500;color:var(--indigo-deep);margin-top:12px;padding-top:12px;border-top:1px solid var(--border);cursor:pointer;}
+  .qc-seeall i{font-size:13px;}
+
+  /* Compare With — curated + see all */
+  .section-title{font-family:'Fraunces',serif;font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:0 0 4px;}
+  .section-sub{font-size:12px;color:var(--ink-mute);margin:0 0 14px;}
+  .compare-scroll{display:flex;gap:12px;overflow-x:auto;margin:0 -20px;padding:0 20px 4px;scrollbar-width:none;}
+  .compare-scroll::-webkit-scrollbar{display:none;}
+  .compare-card-item{flex:0 0 210px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;box-shadow:var(--shadow-card);display:flex;flex-direction:column;gap:9px;cursor:pointer;}
+  .compare-name{font-size:13px;font-weight:600;}
+  .compare-diff-kicker{font-size:10px;color:var(--ink-mute);font-weight:500;}
+  .compare-diff{font-size:12px;color:var(--ink);line-height:1.45;margin:0;}
+  .compare-seeall{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:500;color:var(--indigo-deep);margin-top:14px;padding:11px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;}
+  .compare-seeall i{font-size:14px;}
+
+  /* Breakdown comparison page */
+  .bd-header{margin-bottom:20px;}
+  .bd-vs-row{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
+  .bd-co{display:flex;align-items:center;gap:8px;}
+  .bd-co-name{font-family:'Fraunces',serif;font-size:17px;font-weight:500;}
+  .bd-vs{font-size:12px;color:var(--ink-mute);font-weight:500;}
+  .bd-diff-line{font-size:13px;color:var(--ink-soft);line-height:1.5;margin:8px 0 0;}
+  .bd-table{width:100%;border-collapse:collapse;margin-top:20px;}
+  .bd-table th{font-size:10.5px;color:var(--ink-mute);text-align:center;font-weight:500;padding:8px 4px;border-bottom:1px solid var(--border);}
+  .bd-table th:first-child{text-align:left;}
+  .bd-table td{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink);text-align:center;padding:11px 4px;border-bottom:1px solid var(--surface-tint);}
+  .bd-table td:first-child{font-family:'Inter',sans-serif;font-size:12px;text-align:left;color:var(--ink-soft);}
+  .bd-table td.better{color:#0E5A3A;font-weight:600;}
+  .bd-full-link{display:flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:500;color:var(--indigo-deep);margin-top:22px;padding:13px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;}
+  .bd-full-link i{font-size:14px;}
+</style>
+</head>
+<body>
+
+<div class="frames">
+
+  <!-- ============= FRAME 1: QUICK CHECK — 2 ITEMS, STRENGTH + WATCH ============= -->
+  <div class="frame-block">
+    <div class="frame-label">1. Quick Check — key strength + key watch-out only</div>
+    <div class="frame-note">Down to exactly 2 items instead of 3 arbitrary ones. Red is reserved specifically for the <b>single most important</b> thing worth watching \u2014 not every unmet criterion, just this one \u2014 which keeps red rare and meaningful rather than routine. Framed as "worth watching," not "weakness," to avoid alarm.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text"><p class="co-name">Guaranty Trust Holding Co</p><p class="co-sector">Banking</p></div>
+        </div>
+
+        <div class="qc-card">
+          <span class="qc-kicker">Quick Check</span>
+          <h2 class="qc-title">A fast look at the fundamentals.</h2>
+          <div class="qc-generated"><i class="ti ti-robot"></i>Generated automatically from public financial data.</div>
+
+          <div class="qc-row">
+            <div class="qc-badge strength"><i class="ti ti-check"></i></div>
+            <div>
+              <div class="qc-row-label strength">Key strength</div>
+              <div class="qc-category">Valuation</div>
+              <div class="qc-text">Trading below the sector average on price</div>
+            </div>
+          </div>
+          <div class="qc-row">
+            <div class="qc-badge watch"><i class="ti ti-alert-triangle"></i></div>
+            <div>
+              <div class="qc-row-label watch">Worth watching</div>
+              <div class="qc-category">Financial Strength</div>
+              <div class="qc-text">Capital buffer is thinner than sector peers</div>
+            </div>
+          </div>
+
+          <div class="qc-seeall">See full breakdown<i class="ti ti-arrow-right"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 2: COMPARE WITH — CURATED + SEE ALL ============= -->
+  <div class="frame-block">
+    <div class="frame-label">2. Compare With — curated picks, plus the full sector</div>
+    <div class="frame-note">Previously silently stopped at 2 peers with no way to see the rest. Now: curated picks stay as the fast default, and <b>"See all 6 banks"</b> opens the full sector list \u2014 same curated-plus-full-list pattern as Sector View. Tapping any card (curated or from the full list) opens the breakdown page in frame 3, not straight to that company's own analysis.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <p class="section-title">Compare With</p>
+        <p class="section-sub">See how GTCO differs from other Nigerian banks.</p>
+        <div class="compare-scroll">
+          <div class="compare-card-item"><div class="compare-name">Zenith Bank</div><div class="compare-diff-kicker">What's different</div><p class="compare-diff">A more conservative lender with a larger, steadier loan book.</p></div>
+          <div class="compare-card-item"><div class="compare-name">UBA</div><div class="compare-diff-kicker">What's different</div><p class="compare-diff">Similar size, much larger pan-African footprint.</p></div>
+        </div>
+        <div class="compare-seeall">See all 6 banks<i class="ti ti-arrow-right"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 3: BREAKDOWN COMPARISON PAGE ============= -->
+  <div class="frame-block">
+    <div class="frame-label">3. The breakdown page — where a tap actually goes</div>
+    <div class="frame-note">A focused side-by-side, not a jump straight into Zenith's own analysis. This is where "Compare With" actually delivers its value \u2014 the comparison done for you, in one view, instead of two separate readings the user would have to reconcile themselves. A link at the bottom still offers the full switch-over for anyone who wants to go deeper.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+        </div>
+        <div class="bd-header">
+          <div class="bd-vs-row">
+            <div class="bd-co"><div class="co-mark">GT</div><span class="bd-co-name">GTCO</span></div>
+            <span class="bd-vs">vs</span>
+            <div class="bd-co"><div class="co-mark" style="background:#0B5F7F;">ZB</div><span class="bd-co-name">Zenith Bank</span></div>
+          </div>
+          <p class="bd-diff-line">A more conservative lender with a larger, steadier loan book.</p>
+        </div>
+
+        <table class="bd-table">
+          <tr><th>Metric</th><th>GTCO</th><th>Zenith</th></tr>
+          <tr><td>ROE</td><td class="better">24.1%</td><td>19.8%</td></tr>
+          <tr><td>P/E</td><td class="better">6.2x</td><td>7.9x</td></tr>
+          <tr><td>NPL Ratio</td><td>3.6%</td><td class="better">3.1%</td></tr>
+          <tr><td>Dividend Yield</td><td class="better">5.8%</td><td>4.9%</td></tr>
+          <tr><td>Capital Adequacy</td><td>15.2%</td><td class="better">18.4%</td></tr>
+        </table>
+
+        <div class="bd-full-link"><i class="ti ti-arrow-right"></i>See Zenith's full analysis</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

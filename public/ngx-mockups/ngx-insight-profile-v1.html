@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NGX Insight — Profile v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+  :root{
+    --ink:#14181C; --ink-soft:#4B5158; --ink-mute:#8A8F94;
+    --page:#F5F5F1; --surface:#FFFFFF; --surface-tint:#EFF1EC; --border:#E4E3DA;
+    --indigo:#5A54C4; --indigo-tint:#ECEAFA; --indigo-deep:#332F86;
+    --green:#1E8E5A; --green-tint:#E6F4EC; --red:#B75151;
+    --radius-lg:24px; --radius-md:18px; --radius-sm:12px;
+    --shadow-hero: 0 2px 4px rgba(20,24,28,0.04), 0 14px 32px rgba(20,24,28,0.08);
+    --shadow-card: 0 1px 2px rgba(20,24,28,0.03), 0 6px 18px rgba(20,24,28,0.05);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#DCDCD5;font-family:'Inter',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding:40px;}
+  .frames{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .frame-block{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .frame-label{font-size:13px;font-weight:500;color:var(--ink-soft);background:var(--surface);border:1px solid var(--border);padding:6px 14px;border-radius:999px;}
+  .frame-note{max-width:393px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;background:var(--surface);border:1px dashed var(--border);padding:10px 14px;border-radius:12px;}
+  .frame-note b{color:var(--ink);}
+  .device{width:393px;height:852px;background:var(--page);border-radius:52px;border:1px solid #C9C9C1;box-shadow:0 30px 60px rgba(0,0,0,0.18);overflow:hidden;position:relative;display:flex;flex-direction:column;}
+  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#000;border-radius:16px;z-index:30;}
+  .scroll{flex:1;overflow-y:auto;padding:60px 20px 40px;}
+  .scroll::-webkit-scrollbar{display:none;}
+
+  .back-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+  .back-btn{width:36px;height:36px;border-radius:11px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);flex-shrink:0;}
+  .back-btn i{font-size:18px;}
+
+  .page-kicker{font-size:11px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:4px;}
+  .page-title{font-family:'Fraunces',serif;font-size:24px;font-weight:500;letter-spacing:-0.015em;line-height:1.2;margin:0 0 20px;}
+
+  /* Account header */
+  .account-card{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;box-shadow:var(--shadow-hero);margin-bottom:24px;}
+  .avatar{width:52px;height:52px;border-radius:50%;background:var(--indigo);color:#fff;font-family:'Fraunces',serif;font-size:19px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .account-name{font-size:15px;font-weight:600;color:var(--ink);}
+  .account-email{font-size:12px;color:var(--ink-mute);margin-top:2px;}
+  .account-stats{font-size:11px;color:var(--ink-mute);margin-top:5px;}
+  .account-edit{margin-left:auto;color:var(--ink-mute);font-size:16px;}
+
+  .group-title{font-size:11px;font-weight:600;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.03em;margin:22px 0 10px;}
+  .group-title:first-of-type{margin-top:0;}
+  .setting-row{display:flex;align-items:center;gap:13px;background:var(--surface);border:1px solid var(--border);padding:14px 16px;cursor:pointer;}
+  .setting-row:first-child{border-radius:var(--radius-md) var(--radius-md) 0 0;}
+  .setting-row:last-child{border-radius:0 0 var(--radius-md) var(--radius-md);border-bottom:1px solid var(--border);}
+  .setting-row + .setting-row{border-top:none;}
+  .setting-group{box-shadow:var(--shadow-card);border-radius:var(--radius-md);}
+  .setting-icon{width:30px;height:30px;border-radius:8px;background:var(--surface-tint);color:var(--ink-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .setting-icon i{font-size:15px;}
+  .setting-body{flex:1;min-width:0;}
+  .setting-name{font-size:13.5px;font-weight:500;color:var(--ink);}
+  .setting-value{font-size:11.5px;color:var(--ink-mute);margin-top:1px;}
+  .setting-chevron{color:var(--ink-mute);font-size:16px;flex-shrink:0;}
+
+  .promise-card{background:var(--indigo-tint);border-radius:var(--radius-lg);padding:18px 20px;margin:22px 0;}
+  .promise-title{font-family:'Fraunces',serif;font-size:15px;font-weight:500;letter-spacing:-0.01em;margin:0 0 6px;color:var(--ink);}
+  .promise-text{font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin:0;}
+
+  .signout-btn{width:100%;text-align:center;padding:13px;color:var(--red);font-size:13.5px;font-weight:500;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);margin-top:24px;cursor:pointer;}
+  .version-note{text-align:center;font-size:11px;color:var(--ink-mute);margin-top:16px;}
+
+  /* Explainer screen */
+  .explainer-title{font-family:'Fraunces',serif;font-size:24px;font-weight:500;letter-spacing:-0.015em;line-height:1.2;margin:0 0 20px;}
+  .principle-block{margin-bottom:22px;}
+  .principle-icon{width:36px;height:36px;border-radius:10px;background:var(--indigo-tint);color:var(--indigo-deep);display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+  .principle-icon i{font-size:17px;}
+  .principle-title{font-size:14.5px;font-weight:600;color:var(--ink);margin-bottom:5px;}
+  .principle-copy{font-size:13px;color:var(--ink-soft);line-height:1.55;}
+  .compliance-footer{background:var(--surface-tint);border-radius:var(--radius-md);padding:14px 16px;margin-top:8px;}
+  .compliance-footer-text{font-size:12px;color:var(--ink-soft);line-height:1.5;}
+
+  .why-block{margin:24px 0 18px;padding-top:20px;border-top:1px solid var(--border);}
+  .why-title{font-family:'Fraunces',serif;font-size:15px;font-weight:500;letter-spacing:-0.01em;margin-bottom:8px;color:var(--ink);}
+  .why-copy{font-size:12.5px;color:var(--ink-soft);line-height:1.6;}
+</style>
+</head>
+<body>
+
+<div class="frames">
+
+  <!-- ============= FRAME 1: MAIN PROFILE ============= -->
+  <div class="frame-block">
+    <div class="frame-label">1. Profile</div>
+    <div class="frame-note">Kept deliberately plain — this is the one page where "calm" mostly just means "not over-designed." <b>Removed "Preferred broker"</b> — leftover from the cut broker-picker flow, nothing to connect to anymore. <b>Stats trimmed to one line</b> — "companies researched" got cut because it has no clean, honest definition behind it (opened for a second? fully reviewed?); "investments logged" stays because it maps to a real, unambiguous action. Our promise restates the core philosophy once, prominently.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="page-kicker">Profile</div>
+        <h1 class="page-title">Your account.</h1>
+
+        <div class="account-card">
+          <div class="avatar">D</div>
+          <div>
+            <div class="account-name">David Adeyemi</div>
+            <div class="account-email">david@example.com</div>
+            <div class="account-stats">4 investments logged</div>
+          </div>
+          <i class="ti ti-chevron-right account-edit"></i>
+        </div>
+
+        <div class="promise-card">
+          <h2 class="promise-title">Our promise to you</h2>
+          <p class="promise-text">We help you think it through. We never tell you what to buy, and we never execute trades on your behalf.</p>
+        </div>
+
+        <div class="group-title">About</div>
+        <div class="setting-group">
+          <div class="setting-row">
+            <div class="setting-icon"><i class="ti ti-info-circle"></i></div>
+            <div class="setting-body"><div class="setting-name">How NGX Insight works</div></div>
+            <i class="ti ti-chevron-right setting-chevron"></i>
+          </div>
+        </div>
+
+        <div class="group-title">Support</div>
+        <div class="setting-group">
+          <div class="setting-row">
+            <div class="setting-icon"><i class="ti ti-help-circle"></i></div>
+            <div class="setting-body"><div class="setting-name">Help &amp; FAQ</div></div>
+            <i class="ti ti-chevron-right setting-chevron"></i>
+          </div>
+          <div class="setting-row">
+            <div class="setting-icon"><i class="ti ti-mail"></i></div>
+            <div class="setting-body"><div class="setting-name">Contact us</div></div>
+            <i class="ti ti-chevron-right setting-chevron"></i>
+          </div>
+        </div>
+
+        <div class="group-title">Legal</div>
+        <div class="setting-group">
+          <div class="setting-row">
+            <div class="setting-icon"><i class="ti ti-file-text"></i></div>
+            <div class="setting-body"><div class="setting-name">Terms of Service</div></div>
+            <i class="ti ti-chevron-right setting-chevron"></i>
+          </div>
+          <div class="setting-row">
+            <div class="setting-icon"><i class="ti ti-shield-lock"></i></div>
+            <div class="setting-body"><div class="setting-name">Privacy Policy</div></div>
+            <i class="ti ti-chevron-right setting-chevron"></i>
+          </div>
+        </div>
+
+        <button class="signout-btn">Sign out</button>
+        <div class="version-note">NGX Insight v1.0.0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 2: HOW NGX INSIGHT WORKS ============= -->
+  <div class="frame-block">
+    <div class="frame-label">2. "How NGX Insight works" — the philosophy, stated plainly</div>
+    <div class="frame-note">Restructured from negative-first ("we don't...") to positive-first: <b>what the app actually does</b> every day (Understand businesses, Compare evidence, Record your thinking), with the "we don't recommend" content folded into the last principle rather than repeated four times. Marketing-sounding line cut and replaced with something plainer. <b>New: "Why we built this"</b> — one paragraph explaining the gap this product fills, not another restatement of philosophy.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header"><div class="back-btn"><i class="ti ti-arrow-left"></i></div></div>
+        <h1 class="explainer-title">How NGX Insight works.</h1>
+
+        <div class="principle-block">
+          <div class="principle-icon"><i class="ti ti-building"></i></div>
+          <div class="principle-title">Understand businesses</div>
+          <div class="principle-copy">We break financial reports into plain language so you can understand how a company makes money and whether the business is improving.</div>
+        </div>
+
+        <div class="principle-block">
+          <div class="principle-icon"><i class="ti ti-arrows-right-left"></i></div>
+          <div class="principle-title">Compare evidence</div>
+          <div class="principle-copy">Instead of showing a number in isolation, we help you compare it with competitors and understand what it may indicate.</div>
+        </div>
+
+        <div class="principle-block">
+          <div class="principle-icon"><i class="ti ti-notebook"></i></div>
+          <div class="principle-title">Record your thinking</div>
+          <div class="principle-copy">Watchlists, portfolios, and your Decision Journal remember your own investment journey.</div>
+        </div>
+
+        <div class="principle-block">
+          <div class="principle-icon"><i class="ti ti-user-check"></i></div>
+          <div class="principle-title">Your decisions stay yours</div>
+          <div class="principle-copy">No recommendations, no ratings, and no "Strong Buy" badges. We show the evidence so you can reach your own conclusion.</div>
+        </div>
+
+        <div class="why-block">
+          <div class="why-title">Why we built this</div>
+          <div class="why-copy">Many investing apps assume you already know how to evaluate a business, or rely heavily on analyst opinions. NGX Insight was built to help people develop the confidence to make informed investment decisions using evidence they can understand.</div>
+        </div>
+
+        <div class="compliance-footer">
+          <p class="compliance-footer-text">NGX Insight doesn't execute trades. Anything you buy or sell happens through your own broker — we help you decide, not transact.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

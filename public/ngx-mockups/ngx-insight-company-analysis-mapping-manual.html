@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NGX Insight — Quick Check mapping fix + manual entry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+  :root{
+    --ink:#14181C; --ink-soft:#4B5158; --ink-mute:#8A8F94;
+    --page:#F5F5F1; --surface:#FFFFFF; --surface-tint:#EFF1EC; --border:#E4E3DA;
+    --indigo:#5A54C4; --indigo-tint:#ECEAFA; --indigo-deep:#332F86;
+    --green:#1E8E5A; --green-tint:#E6F4EC;
+    --amber:#B7791F; --amber-tint:#FBF1DF;
+    --radius-lg:24px; --radius-md:18px; --radius-sm:12px;
+    --shadow-card: 0 1px 2px rgba(20,24,28,0.03), 0 6px 18px rgba(20,24,28,0.05);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#DCDCD5;font-family:'Inter',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding:40px;}
+  .frames{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .frame-block{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .frame-label{font-size:13px;font-weight:500;color:var(--ink-soft);background:var(--surface);border:1px solid var(--border);padding:6px 14px;border-radius:999px;}
+  .frame-note{max-width:393px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;background:var(--surface);border:1px dashed var(--border);padding:10px 14px;border-radius:12px;}
+  .frame-note b{color:var(--ink);}
+  .device{width:393px;height:852px;background:var(--page);border-radius:52px;border:1px solid #C9C9C1;box-shadow:0 30px 60px rgba(0,0,0,0.18);overflow:hidden;position:relative;display:flex;flex-direction:column;}
+  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#000;border-radius:16px;z-index:30;}
+  .scroll{flex:1;overflow-y:auto;padding:60px 20px 40px;}
+  .scroll::-webkit-scrollbar{display:none;}
+
+  .back-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+  .back-btn{width:36px;height:36px;border-radius:11px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);flex-shrink:0;}
+  .back-btn i{font-size:18px;}
+  .co-id-text{flex:1;min-width:0;}
+  .co-name{font-family:'Fraunces',serif;font-size:16px;font-weight:500;margin:0;letter-spacing:-0.01em;}
+  .co-sector{font-size:11.5px;color:var(--ink-mute);margin:0;}
+
+  .ev-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:18px 20px;box-shadow:var(--shadow-card);margin-bottom:14px;}
+  .ev-question{font-size:13.5px;font-weight:600;color:var(--ink);margin:0 0 12px;}
+  .metric-pair{display:flex;gap:10px;margin-bottom:12px;}
+  .metric-box{flex:1;background:var(--surface-tint);border-radius:var(--radius-sm);padding:12px 13px;}
+  .metric-label{font-size:10.5px;color:var(--ink-mute);margin-bottom:4px;}
+  .metric-value{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;color:var(--ink);}
+  .metric-qualifier{font-size:10px;font-weight:600;margin-top:3px;padding:2px 6px;border-radius:5px;display:inline-block;}
+  .metric-qualifier.high{background:var(--green-tint);color:#0E5A3A;}
+  .metric-qualifier.low{background:var(--amber-tint);color:var(--amber);}
+  .insight-line{font-size:13px;color:var(--ink-soft);line-height:1.55;margin:0;}
+  .insight-line b{color:var(--ink);font-weight:500;}
+  .dividend-note{font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);}
+  .dividend-note b{color:var(--ink);font-weight:500;}
+
+  /* Full breakdown with inline governance check */
+  .fb-title{font-family:'Fraunces',serif;font-size:22px;font-weight:500;letter-spacing:-0.015em;margin:0 0 16px;}
+  .fb-group{margin-bottom:16px;}
+  .fb-group-title{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+  .fb-item{display:flex;align-items:center;gap:10px;padding:9px 6px;margin:0 -6px;border-radius:9px;cursor:pointer;}
+  .fb-item:hover{background:var(--surface-tint);}
+  .fb-icon{width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .fb-icon.met{background:var(--green-tint);color:#0E5A3A;}
+  .fb-text{font-size:13px;color:var(--ink-soft);flex:1;}
+  .fb-chevron{font-size:15px;color:var(--ink-mute);flex-shrink:0;}
+  .fb-icon-type{font-size:9px;color:var(--ink-mute);text-transform:uppercase;font-weight:600;margin-left:6px;}
+  .fb-inline-panel{background:var(--surface-tint);border-radius:var(--radius-sm);padding:12px 13px;margin:2px 0 8px;font-size:12px;color:var(--ink-soft);line-height:1.5;}
+  .fb-inline-panel b{color:var(--ink);}
+
+  /* Search / manual entry */
+  .search-bar{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 15px;margin-bottom:20px;}
+  .search-bar i{color:var(--ink-mute);font-size:16px;}
+  .search-bar input{border:none;background:none;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);flex:1;outline:none;}
+  .no-results{text-align:center;padding:30px 20px;}
+  .no-results-icon{width:44px;height:44px;border-radius:12px;background:var(--surface-tint);color:var(--ink-mute);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+  .no-results-icon i{font-size:20px;}
+  .no-results-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+  .no-results-copy{font-size:12.5px;color:var(--ink-mute);line-height:1.5;margin-bottom:18px;}
+  .add-manually-btn{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:#fff;font-size:13px;font-weight:500;padding:11px 18px;border-radius:var(--radius-sm);cursor:pointer;}
+  .add-manually-btn i{font-size:14px;}
+
+  .form-field{margin-bottom:14px;}
+  .form-label{font-size:11.5px;font-weight:500;color:var(--ink-soft);margin-bottom:6px;display:block;}
+  .form-input{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);background:var(--surface);}
+  .form-row{display:flex;gap:10px;}
+  .form-row .form-field{flex:1;}
+  .no-data-note{display:flex;gap:9px;background:var(--amber-tint);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:16px;}
+  .no-data-note i{color:var(--amber);font-size:15px;flex-shrink:0;margin-top:1px;}
+  .no-data-note-text{font-size:12px;color:var(--ink);line-height:1.5;}
+  .form-submit{width:100%;padding:13px;background:var(--ink);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .form-submit i{font-size:14px;}
+</style>
+</head>
+<body>
+
+<div class="frames">
+
+  <!-- ============= FRAME 1: FINANCIAL HEALTH — NEW REVENUE GROWTH METRIC PAIR ============= -->
+  <div class="frame-block">
+    <div class="frame-label">1. Financial Health — added Revenue Growth pair</div>
+    <div class="frame-note">Second metric pair added specifically to give "Revenue growth vs sector" a real evidence source \u2014 it had none before the merge exposed the gap.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-id-text"><p class="co-name">Financial Health</p><p class="co-sector">Guaranty Trust Holding Co</p></div>
+        </div>
+        <div class="ev-block">
+          <p class="ev-question">Is revenue growing faster or slower than the sector?</p>
+          <div class="metric-pair">
+            <div class="metric-box"><div class="metric-label">Revenue Growth (3yr)</div><div class="metric-value">+12.4%</div><div class="metric-qualifier high">Above sector</div></div>
+            <div class="metric-box"><div class="metric-label">Sector Avg Growth</div><div class="metric-value">+8.1%</div></div>
+          </div>
+          <p class="insight-line">Growing meaningfully faster than the sector as a whole — <b>worth understanding whether that's sustainable</b> or a one-off.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 2: VALUATION — DIVIDEND CONSISTENCY NOTE ============= -->
+  <div class="frame-block">
+    <div class="frame-label">2. Valuation — dividend consistency added</div>
+    <div class="frame-note">"Consistent dividend history" is about years paid, not current yield \u2014 different fact from the yield-vs-sector metric already shown, so it gets its own line rather than being conflated with it.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-id-text"><p class="co-name">Valuation</p><p class="co-sector">Guaranty Trust Holding Co</p></div>
+        </div>
+        <div class="ev-block">
+          <p class="ev-question">How does the price compare to earnings and to what it pays out?</p>
+          <div class="metric-pair">
+            <div class="metric-box"><div class="metric-label">P/E Ratio</div><div class="metric-value">6.2x</div><div class="metric-qualifier high">Below sector</div></div>
+            <div class="metric-box"><div class="metric-label">Dividend Yield</div><div class="metric-value">5.8%</div><div class="metric-qualifier high">Above sector</div></div>
+          </div>
+          <p class="insight-line">Trading below the sector average while paying a higher dividend yield.</p>
+          <div class="dividend-note"><b>Dividend history:</b> paid every year for 8 consecutive years, including through the 2020 downturn.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 3: FULL BREAKDOWN — GOVERNANCE AS INLINE CHECK ============= -->
+  <div class="frame-block">
+    <div class="frame-label">3. Full breakdown — governance flag is an inline note, not a navigation</div>
+    <div class="frame-note">Tapping every other row jumps to a section's evidence. This one is different by nature \u2014 a screening check, not a comparative number \u2014 so it expands in place instead, tagged "Check" to signal the different interaction before you even tap it.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-id-text"><p class="co-name">Quick Check</p><p class="co-sector">Guaranty Trust Holding Co</p></div>
+        </div>
+        <h1 class="fb-title">A fast look at the fundamentals.</h1>
+
+        <div class="fb-group">
+          <div class="fb-group-title">Risk</div>
+          <div class="fb-item"><div class="fb-icon met"><i class="ti ti-check"></i></div><span class="fb-text">Manageable sector concentration</span><i class="ti ti-chevron-right fb-chevron"></i></div>
+          <div class="fb-item"><div class="fb-icon met"><i class="ti ti-check"></i></div><span class="fb-text">No major governance flags</span><span class="fb-icon-type">Check</span></div>
+          <div class="fb-inline-panel"><b>What we checked:</b> NGX and SEC filings for regulatory sanctions, related-party transaction disclosures, and board/audit controversies in the last 3 years. None found as of this analysis.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 4: SEARCH — NO RESULTS, NO MANUAL ENTRY ============= -->
+  <div class="frame-block">
+    <div class="frame-label">4. Search — no match, and that's the end of it</div>
+    <div class="frame-note">No manual entry path. We draw everything from the API — if it's not there, we don't support it. Simpler than building a parallel data model for a rare edge case, and honest about the limitation rather than pretending to solve it.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="search-bar"><i class="ti ti-search"></i><input value="Ovaioza Foods Plc" /></div>
+        <div class="no-results">
+          <div class="no-results-icon"><i class="ti ti-search-off"></i></div>
+          <div class="no-results-title">We couldn't find "Ovaioza Foods Plc"</div>
+          <p class="no-results-copy">It may not be listed on the NGX, or we don't have it in our data. We're not able to track companies outside what's available to us.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

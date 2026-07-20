@@ -1,26 +1,86 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-ink: #14181c;
+  --color-ink-soft: #4b5158;
+  --color-ink-mute: #5a6167;
+  --color-page: #f5f5f1;
+  --color-surface: #fefefc;
+  --color-surface-tint: #eff1ec;
+  --color-border: #e4e3da;
+
+  --color-indigo: #5a54c4;
+  --color-indigo-light: #6e67d6;
+  --color-indigo-tint: #eceafa;
+  --color-indigo-deep: #332f86;
+  --color-indigo-glow: rgba(90, 84, 196, 0.08);
+
+  --color-green: #1e8e5a;
+  --color-green-deep: #0e5a3a;
+  --color-green-tint: #e6f4ec;
+  --color-green-glow: rgba(30, 142, 90, 0.07);
+  --color-amber: #b7791f;
+  --color-amber-tint: #fbf1df;
+
+  --radius-lg: 24px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+
+  --shadow-hero: 0 2px 4px rgba(20, 24, 28, 0.04), 0 14px 32px rgba(20, 24, 28, 0.08);
+  --shadow-card: 0 1px 2px rgba(20, 24, 28, 0.03), 0 6px 18px rgba(20, 24, 28, 0.05);
+  --shadow-float: 0 10px 24px rgba(20, 24, 28, 0.1);
+  --shadow-avatar: 0 3px 10px rgba(51, 47, 134, 0.28);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-ink-mute: var(--color-ink-mute);
+  --color-page: var(--color-page);
+  --color-surface: var(--color-surface);
+  --color-surface-tint: var(--color-surface-tint);
+  --color-border: var(--color-border);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-indigo: var(--color-indigo);
+  --color-indigo-light: var(--color-indigo-light);
+  --color-indigo-tint: var(--color-indigo-tint);
+  --color-indigo-deep: var(--color-indigo-deep);
+
+  --color-green: var(--color-green);
+  --color-green-deep: var(--color-green-deep);
+  --color-green-tint: var(--color-green-tint);
+  --color-amber: var(--color-amber);
+  --color-amber-tint: var(--color-amber-tint);
+
+  --radius-lg: var(--radius-lg);
+  --radius-md: var(--radius-md);
+  --radius-sm: var(--radius-sm);
+
+  --shadow-hero: var(--shadow-hero);
+  --shadow-card: var(--shadow-card);
+  --shadow-float: var(--shadow-float);
+  --shadow-avatar: var(--shadow-avatar);
+
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-fraunces);
+  --font-mono: var(--font-plex-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-inter), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

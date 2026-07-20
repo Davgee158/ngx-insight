@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NGX Insight — Auth v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+  :root{
+    --ink:#14181C; --ink-soft:#4B5158; --ink-mute:#5A6167;
+    --page:#F5F5F1; --surface:#FFFFFF; --surface-tint:#EFF1EC; --border:#E4E3DA;
+    --indigo:#5A54C4; --indigo-tint:#ECEAFA; --indigo-deep:#332F86;
+    --green:#1E8E5A; --green-tint:#E6F4EC; --red:#B75151;
+    --radius-lg:24px; --radius-md:18px; --radius-sm:12px;
+    --shadow-hero: 0 2px 4px rgba(20,24,28,0.04), 0 14px 32px rgba(20,24,28,0.08);
+    --shadow-card: 0 1px 2px rgba(20,24,28,0.03), 0 6px 18px rgba(20,24,28,0.05);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#DCDCD5;font-family:'Inter',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding:40px;}
+  .frames{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .frame-block{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .frame-label{font-size:13px;font-weight:500;color:var(--ink-soft);background:var(--surface);border:1px solid var(--border);padding:6px 14px;border-radius:999px;}
+  .frame-note{max-width:393px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;background:var(--surface);border:1px dashed var(--border);padding:10px 14px;border-radius:12px;}
+  .frame-note b{color:var(--ink);}
+  .device{width:393px;height:852px;background:var(--page);border-radius:52px;border:1px solid #C9C9C1;box-shadow:0 30px 60px rgba(0,0,0,0.18);overflow:hidden;position:relative;display:flex;flex-direction:column;}
+  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#000;border-radius:16px;z-index:30;}
+  .scroll{flex:1;overflow-y:auto;padding:60px 24px 32px;}
+  .scroll::-webkit-scrollbar{display:none;}
+
+  /* Focus-visible — applied globally per Hallmark audit finding */
+  a:focus-visible, button:focus-visible, input:focus-visible, .text-link:focus-visible{
+    outline:2px solid var(--indigo-deep); outline-offset:2px; border-radius:8px;
+  }
+
+  /* ---------- Welcome screen ---------- */
+  .welcome-wrap{height:100%;display:flex;flex-direction:column;justify-content:space-between;padding-top:20px;}
+  .welcome-top{display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:64px;}
+  .welcome-mark{width:56px;height:56px;margin-bottom:22px;}
+  .welcome-title{font-family:'Fraunces',serif;font-size:28px;font-weight:500;letter-spacing:-0.015em;line-height:1.15;margin:0 0 10px;}
+  .welcome-sub{font-size:14px;color:var(--ink-soft);line-height:1.55;max-width:280px;margin:0 auto;}
+  .welcome-visual{flex:1;display:flex;align-items:center;justify-content:center;padding:28px 0;}
+  .welcome-visual-inner{width:100%;background:var(--indigo-tint);border-radius:var(--radius-lg);padding:22px;display:flex;flex-direction:column;gap:10px;}
+  .wv-row{display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:var(--radius-sm);padding:11px 14px;box-shadow:var(--shadow-card);}
+  .wv-icon{width:26px;height:26px;border-radius:7px;background:var(--indigo-tint);color:var(--indigo-deep);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .wv-icon i{font-size:13px;}
+  .wv-text{font-size:12px;color:var(--ink-soft);}
+  .wv-text b{color:var(--ink);font-weight:600;}
+  .welcome-actions{padding-bottom:12px;}
+  .btn-primary{width:100%;padding:15px;background:var(--indigo-deep);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
+  .btn-secondary{width:100%;padding:15px;background:var(--surface);color:var(--ink);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14.5px;font-weight:600;cursor:pointer;margin-top:10px;font-family:'Inter',sans-serif;}
+  .welcome-legal{text-align:center;font-size:11px;color:var(--ink-mute);margin-top:16px;line-height:1.5;}
+  .welcome-legal a{color:var(--ink-soft);text-decoration:underline;}
+
+  /* ---------- Form screens ---------- */
+  .back-header{display:flex;align-items:center;gap:12px;margin-bottom:24px;}
+  .back-btn{width:36px;height:36px;border-radius:11px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);flex-shrink:0;cursor:pointer;}
+  .back-btn i{font-size:18px;}
+  .form-mark{width:36px;height:36px;margin-bottom:18px;}
+  .form-title{font-family:'Fraunces',serif;font-size:24px;font-weight:500;letter-spacing:-0.015em;line-height:1.2;margin:0 0 6px;}
+  .form-sub{font-size:13.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 28px;}
+
+  .field{margin-bottom:16px;}
+  .field-label{display:block;font-size:12.5px;font-weight:500;color:var(--ink);margin-bottom:7px;}
+  .field-input-wrap{position:relative;}
+  .field-input{width:100%;padding:13px 14px;font-size:14px;font-family:'Inter',sans-serif;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;}
+  .field-input::placeholder{color:var(--ink-mute);}
+  .field-input:focus{border-color:var(--indigo);}
+  .field-toggle{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--ink-mute);font-size:16px;background:none;border:none;cursor:pointer;padding:2px;}
+  .field-hint{font-size:11.5px;color:var(--ink-mute);margin-top:6px;line-height:1.4;}
+
+  .row-between{display:flex;align-items:center;justify-content:space-between;margin:2px 0 22px;}
+  .checkbox-row{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);}
+  .checkbox-row input{width:16px;height:16px;accent-color:var(--indigo-deep);}
+  .text-link{color:var(--indigo-deep);font-size:12.5px;font-weight:500;text-decoration:none;background:none;border:none;cursor:pointer;padding:2px;}
+
+  .divider{display:flex;align-items:center;gap:12px;margin:22px 0;}
+  .divider-line{flex:1;height:1px;background:var(--border);}
+  .divider-text{font-size:11.5px;color:var(--ink-mute);font-family:'IBM Plex Mono',monospace;}
+
+  .btn-social{width:100%;padding:13px;background:var(--surface);color:var(--ink);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13.5px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;font-family:'Inter',sans-serif;}
+  .btn-social i{font-size:17px;}
+
+  .switch-footer{text-align:center;font-size:13px;color:var(--ink-soft);margin-top:24px;}
+  .switch-footer .text-link{font-size:13px;}
+
+  .strength-wrap{display:flex;gap:5px;margin-top:9px;}
+  .strength-bar{height:3px;flex:1;border-radius:2px;background:var(--border);}
+  .strength-bar.filled{background:var(--green);}
+  .strength-label{font-size:11px;color:var(--ink-mute);margin-top:6px;}
+
+  .promise-mini{background:var(--indigo-tint);border-radius:var(--radius-md);padding:14px 16px;margin-top:22px;display:flex;gap:10px;align-items:flex-start;}
+  .promise-mini i{color:var(--indigo-deep);font-size:15px;margin-top:1px;flex-shrink:0;}
+  .promise-mini-text{font-size:12px;color:var(--ink-soft);line-height:1.5;}
+</style>
+</head>
+<body>
+
+<div class="frames">
+
+  <!-- ============= FRAME 1: WELCOME ============= -->
+  <div class="frame-block">
+    <div class="frame-label">1. Welcome</div>
+    <div class="frame-note">One primary action, per the constitution — <b>"Create account"</b> leads, sign in is secondary. The evidence-preview card sets expectations before any commitment: this is what you'll actually see inside, not a marketing screenshot.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="welcome-wrap">
+          <div class="welcome-top">
+            <svg class="welcome-mark" viewBox="0 0 100 100">
+              <polygon points="92,50 71,86.37 56.93,54" fill="#332F86"/>
+              <polygon points="71,86.37 29,86.37 50,58" fill="#5A54C4"/>
+              <polygon points="29,86.37 8,50 43.07,54" fill="#332F86"/>
+              <polygon points="8,50 29,13.63 43.07,46" fill="#5A54C4"/>
+              <polygon points="29,13.63 71,13.63 50,42" fill="#332F86"/>
+              <polygon points="71,13.63 92,50 56.93,46" fill="#5A54C4"/>
+            </svg>
+            <h1 class="welcome-title">Understand before<br>you invest.</h1>
+            <p class="welcome-sub">NGX Insight breaks down Nigerian public companies into evidence you can actually understand.</p>
+          </div>
+
+          <div class="welcome-visual">
+            <div class="welcome-visual-inner">
+              <div class="wv-row"><div class="wv-icon"><i class="ti ti-building"></i></div><div class="wv-text">Plain-language <b>business breakdowns</b></div></div>
+              <div class="wv-row"><div class="wv-icon"><i class="ti ti-arrows-right-left"></i></div><div class="wv-text">Compare against <b>sector peers</b></div></div>
+              <div class="wv-row"><div class="wv-icon"><i class="ti ti-notebook"></i></div><div class="wv-text">A record of <b>your own thinking</b></div></div>
+            </div>
+          </div>
+
+          <div class="welcome-actions">
+            <button class="btn-primary">Create account</button>
+            <button class="btn-secondary">Sign in</button>
+            <div class="welcome-legal">By continuing, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 2: SIGN IN ============= -->
+  <div class="frame-block">
+    <div class="frame-label">2. Sign in</div>
+    <div class="frame-note">Kept plain and fast — this isn't a moment for teaching, it's a moment for getting back to work. <b>Password visibility toggle</b> and <b>"Forgot password"</b> are the only secondary elements. Google is the one social option, since it's what most beginner investors already use daily.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header"><div class="back-btn"><i class="ti ti-arrow-left"></i></div></div>
+
+        <svg class="form-mark" viewBox="0 0 100 100">
+          <polygon points="92,50 71,86.37 56.93,54" fill="#332F86"/>
+          <polygon points="71,86.37 29,86.37 50,58" fill="#5A54C4"/>
+          <polygon points="29,86.37 8,50 43.07,54" fill="#332F86"/>
+          <polygon points="8,50 29,13.63 43.07,46" fill="#5A54C4"/>
+          <polygon points="29,13.63 71,13.63 50,42" fill="#332F86"/>
+          <polygon points="71,13.63 92,50 56.93,46" fill="#5A54C4"/>
+        </svg>
+        <h1 class="form-title">Welcome back.</h1>
+        <p class="form-sub">Sign in to pick up your research where you left off.</p>
+
+        <div class="field">
+          <label class="field-label">Email</label>
+          <input class="field-input" type="email" placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label class="field-label">Password</label>
+          <div class="field-input-wrap">
+            <input class="field-input" type="password" placeholder="Enter your password" style="padding-right:40px;">
+            <button class="field-toggle" aria-label="Show password"><i class="ti ti-eye"></i></button>
+          </div>
+        </div>
+
+        <div class="row-between">
+          <label class="checkbox-row"><input type="checkbox"> Remember me</label>
+          <button class="text-link">Forgot password?</button>
+        </div>
+
+        <button class="btn-primary">Sign in</button>
+
+        <div class="divider"><div class="divider-line"></div><div class="divider-text">OR</div><div class="divider-line"></div></div>
+
+        <button class="btn-social"><i class="ti ti-brand-google"></i>Continue with Google</button>
+
+        <div class="switch-footer">New to NGX Insight? <button class="text-link" style="font-size:13px;">Create an account</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 3: SIGN UP ============= -->
+  <div class="frame-block">
+    <div class="frame-label">3. Sign up</div>
+    <div class="frame-note">Name field kept optional-feeling but present, for the avatar initial on Profile. <b>Live password strength meter</b> replaces a wall of validation rules — teaches through feedback, not instruction, matching the app's core philosophy. Promise reminder placed here (not buried in Terms) because this is the moment trust actually gets decided.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header"><div class="back-btn"><i class="ti ti-arrow-left"></i></div></div>
+
+        <svg class="form-mark" viewBox="0 0 100 100">
+          <polygon points="92,50 71,86.37 56.93,54" fill="#332F86"/>
+          <polygon points="71,86.37 29,86.37 50,58" fill="#5A54C4"/>
+          <polygon points="29,86.37 8,50 43.07,54" fill="#332F86"/>
+          <polygon points="8,50 29,13.63 43.07,46" fill="#5A54C4"/>
+          <polygon points="29,13.63 71,13.63 50,42" fill="#332F86"/>
+          <polygon points="71,13.63 92,50 56.93,46" fill="#5A54C4"/>
+        </svg>
+        <h1 class="form-title">Create your account.</h1>
+        <p class="form-sub">Takes less than a minute. No card required.</p>
+
+        <div class="field">
+          <label class="field-label">Full name</label>
+          <input class="field-input" type="text" placeholder="David Adeyemi">
+        </div>
+        <div class="field">
+          <label class="field-label">Email</label>
+          <input class="field-input" type="email" placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label class="field-label">Password</label>
+          <div class="field-input-wrap">
+            <input class="field-input" type="password" placeholder="At least 8 characters" style="padding-right:40px;">
+            <button class="field-toggle" aria-label="Show password"><i class="ti ti-eye"></i></button>
+          </div>
+          <div class="strength-wrap">
+            <div class="strength-bar filled"></div><div class="strength-bar filled"></div><div class="strength-bar"></div><div class="strength-bar"></div>
+          </div>
+          <div class="strength-label">Good — add a number or symbol for a stronger password.</div>
+        </div>
+
+        <button class="btn-primary">Create account</button>
+
+        <div class="divider"><div class="divider-line"></div><div class="divider-text">OR</div><div class="divider-line"></div></div>
+
+        <button class="btn-social"><i class="ti ti-brand-google"></i>Continue with Google</button>
+
+        <div class="promise-mini">
+          <i class="ti ti-shield-check"></i>
+          <div class="promise-mini-text">We'll never recommend what to buy or execute trades on your behalf. Just evidence — you decide.</div>
+        </div>
+
+        <div class="switch-footer">Already have an account? <button class="text-link" style="font-size:13px;">Sign in</button></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

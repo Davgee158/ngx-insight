@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NGX Insight — Company Analysis, full Hub overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+  :root{
+    --ink:#14181C; --ink-soft:#4B5158; --ink-mute:#8A8F94;
+    --page:#F5F5F1; --surface:#FFFFFF; --surface-tint:#EFF1EC; --border:#E4E3DA;
+    --indigo:#5A54C4; --indigo-tint:#ECEAFA; --indigo-deep:#332F86;
+    --green:#1E8E5A; --green-tint:#E6F4EC;
+    --amber:#B7791F; --amber-tint:#FBF1DF;
+    --radius-lg:24px; --radius-md:18px; --radius-sm:12px;
+    --shadow-hero: 0 2px 4px rgba(20,24,28,0.04), 0 14px 32px rgba(20,24,28,0.08);
+    --shadow-card: 0 1px 2px rgba(20,24,28,0.03), 0 6px 18px rgba(20,24,28,0.05);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#DCDCD5;font-family:'Inter',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding:40px;}
+  .frames{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .frame-block{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .frame-label{font-size:13px;font-weight:500;color:var(--ink-soft);background:var(--surface);border:1px solid var(--border);padding:6px 14px;border-radius:999px;}
+  .frame-note{max-width:393px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;background:var(--surface);border:1px dashed var(--border);padding:10px 14px;border-radius:12px;}
+  .frame-note b{color:var(--ink);}
+  .device{width:393px;height:852px;background:var(--page);border-radius:52px;border:1px solid #C9C9C1;box-shadow:0 30px 60px rgba(0,0,0,0.18);overflow:hidden;position:relative;display:flex;flex-direction:column;}
+  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#000;border-radius:16px;z-index:30;}
+  .scroll{flex:1;overflow-y:auto;padding:60px 20px 40px;}
+  .scroll::-webkit-scrollbar{display:none;}
+
+  .back-header{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+  .back-btn{width:36px;height:36px;border-radius:11px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);flex-shrink:0;}
+  .back-btn i{font-size:18px;}
+  .co-mark{width:36px;height:36px;border-radius:10px;background:var(--ink);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .co-id-text{flex:1;min-width:0;}
+  .co-name{font-family:'Fraunces',serif;font-size:16px;font-weight:500;margin:0;letter-spacing:-0.01em;}
+  .co-sector{font-size:11.5px;color:var(--ink-mute);margin:0;}
+
+  .decision-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-hero);padding:22px 20px;margin-bottom:18px;}
+  .dc-kicker{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:500;color:var(--indigo-deep);background:var(--indigo-tint);padding:5px 10px;border-radius:999px;margin-bottom:14px;}
+  .dc-kicker.held{color:#0E5A3A;background:var(--green-tint);}
+  .dc-kicker i{font-size:12px;}
+  .dc-title{font-family:'Fraunces',serif;font-size:20px;font-weight:500;letter-spacing:-0.01em;line-height:1.28;margin:0 0 10px;}
+  .dc-copy{font-size:13px;color:var(--ink-soft);line-height:1.5;margin:0;}
+  .position-note{display:inline-flex;align-items:center;gap:6px;background:var(--green-tint);color:#0E5A3A;padding:5px 10px;border-radius:999px;font-size:11.5px;font-weight:500;margin-bottom:14px;}
+  .position-note i{font-size:12px;}
+
+  .action-row{display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-card);margin-bottom:20px;}
+  .action-row-label{font-size:11.5px;color:var(--ink-mute);margin-bottom:2px;}
+  .action-primary{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--ink);color:#fff;border:none;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;padding:13px;border-radius:var(--radius-sm);cursor:pointer;width:100%;}
+  .action-primary i{font-size:15px;}
+  .action-secondary{background:transparent;color:var(--ink-soft);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:7px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:11px;border-radius:var(--radius-sm);cursor:pointer;width:100%;}
+  .action-link{text-align:center;font-size:12.5px;color:var(--ink-mute);}
+  .action-link b{color:var(--indigo-deep);font-weight:500;}
+  .action-pair{display:flex;gap:8px;}
+  .action-pair .action-primary, .action-pair .action-secondary{width:auto;flex:1;}
+
+  .scorecard-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-card);margin-bottom:20px;}
+  .scorecard-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px;}
+  .scorecard-kicker{font-size:10.5px;font-weight:500;letter-spacing:0.03em;text-transform:uppercase;color:var(--ink-mute);}
+  .scorecard-tally{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--ink);}
+  .scorecard-title{font-family:'Fraunces',serif;font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:0 0 16px;}
+  .score-group{margin-bottom:12px;}
+  .score-group-title{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+  .score-item{display:flex;align-items:center;gap:9px;padding:6px 6px;margin:0 -6px;border-radius:8px;}
+  .score-icon{width:16px;height:16px;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .score-icon.met{background:var(--green-tint);color:#0E5A3A;}
+  .score-icon.notmet{background:var(--surface-tint);color:var(--ink-mute);}
+  .score-icon i{font-size:11px;}
+  .score-text{font-size:12.5px;color:var(--ink-soft);flex:1;}
+  .score-chevron{font-size:14px;color:var(--ink-mute);flex-shrink:0;}
+  .scorecard-disclaimer{font-size:11px;color:var(--ink-mute);margin-top:10px;padding-top:14px;border-top:1px solid var(--border);line-height:1.5;}
+
+  .section-title{font-family:'Fraunces',serif;font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:0 0 4px;}
+  .section-sub{font-size:12px;color:var(--ink-mute);margin:0 0 14px;}
+  .sec-list{display:flex;flex-direction:column;gap:10px;}
+  .sec-item{display:flex;align-items:center;gap:13px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:15px 16px;box-shadow:var(--shadow-card);}
+  .sec-status{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--green-tint);color:#0E5A3A;}
+  .sec-status i{font-size:15px;}
+  .sec-name{font-size:13.5px;font-weight:600;color:var(--ink);}
+  .sec-tag{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.03em;color:var(--indigo-deep);background:var(--indigo-tint);padding:2px 6px;border-radius:5px;margin-left:7px;}
+  .sec-tag.optional{color:var(--ink-mute);background:var(--surface-tint);}
+
+  .section-wrap{margin-top:22px;}
+  .compare-scroll{display:flex;gap:12px;overflow-x:auto;margin:0 -20px;padding:0 20px 4px;scrollbar-width:none;}
+  .compare-scroll::-webkit-scrollbar{display:none;}
+  .compare-card-item{flex:0 0 200px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;box-shadow:var(--shadow-card);display:flex;flex-direction:column;gap:9px;}
+  .compare-name{font-size:13px;font-weight:600;}
+  .compare-diff-kicker{font-size:10px;color:var(--ink-mute);font-weight:500;}
+  .compare-diff{font-size:12px;color:var(--ink);line-height:1.45;margin:0;}
+</style>
+</head>
+<body>
+
+<div class="frames">
+
+  <!-- ============= FRAME 1: FULL HUB OVERVIEW, UNHELD ============= -->
+  <div class="frame-block">
+    <div class="frame-label">1. Full Hub overview \u2014 everything, in order, before opening any section</div>
+    <div class="frame-note">This is what a user actually scrolls through on arrival: synthesis \u2192 scorecard (all 6 categories) \u2192 the one place actions live \u2192 section list \u2192 Compare With. Nothing hidden, nothing assumed \u2014 the complete picture of what's on this page.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text"><p class="co-name">Guaranty Trust Holding Co</p><p class="co-sector">Banking</p></div>
+        </div>
+
+        <div class="decision-card">
+          <div class="dc-kicker"><i class="ti ti-circle-check"></i>Complete picture — all 5 core sections reviewed</div>
+          <h1 class="dc-title">Here's what the evidence shows.</h1>
+          <p class="dc-copy">Placeholder: consistent profitability, a reasonable valuation relative to the sector, and manageable risk exposure.</p>
+        </div>
+
+        <div class="scorecard-card">
+          <div class="scorecard-header"><span class="scorecard-kicker">Evidence Scorecard</span><span class="scorecard-tally">10 of 12</span></div>
+          <h2 class="scorecard-title">Where the evidence is strong, and where it isn't.</h2>
+          <div class="score-group">
+            <div class="score-group-title">Profitability</div>
+            <div class="score-item"><div class="score-icon met"><i class="ti ti-check"></i></div><span class="score-text">3-year profit growth</span><i class="ti ti-chevron-right score-chevron"></i></div>
+            <div class="score-item"><div class="score-icon met"><i class="ti ti-check"></i></div><span class="score-text">Stable margins</span><i class="ti ti-chevron-right score-chevron"></i></div>
+          </div>
+          <div class="score-group">
+            <div class="score-group-title">Financial Strength</div>
+            <div class="score-item"><div class="score-icon notmet"><i class="ti ti-minus"></i></div><span class="score-text">Capital buffer vs. sector</span><i class="ti ti-chevron-right score-chevron"></i></div>
+            <div class="score-item"><div class="score-icon met"><i class="ti ti-check"></i></div><span class="score-text">Falling NPL ratio</span><i class="ti ti-chevron-right score-chevron"></i></div>
+          </div>
+          <div class="score-group">
+            <div class="score-group-title">Valuation</div>
+            <div class="score-item"><div class="score-icon met"><i class="ti ti-check"></i></div><span class="score-text">P/E below sector average</span><i class="ti ti-chevron-right score-chevron"></i></div>
+            <div class="score-item"><div class="score-icon met"><i class="ti ti-check"></i></div><span class="score-text">Dividend yield above sector</span><i class="ti ti-chevron-right score-chevron"></i></div>
+          </div>
+          <div class="score-group">
+            <div class="score-group-title">Growth</div>
+            <div class="score-item"><div class="score-icon met"><i class="ti ti-check"></i></div><span class="score-text">Revenue growth vs. sector</span><i class="ti ti-chevron-right score-chevron"></i></div>
+            <div class="score-item"><div class="score-icon notmet"><i class="ti ti-minus"></i></div><span class="score-text">New segment growth pace</span><i class="ti ti-chevron-right score-chevron"></i></div>
+          </div>
+          <div class="score-group">
+            <div class="score-group-title">Management &amp; Capital Allocation</div>
+            <div class="score-item"><div class="score-icon met"><i class="ti ti-check"></i></div><span class="score-text">Consistent dividend history</span><i class="ti ti-chevron-right score-chevron"></i></div>
+            <div class="score-item"><div class="score-icon met"><i class="ti ti-check"></i></div><span class="score-text">ROE above sector average</span><i class="ti ti-chevron-right score-chevron"></i></div>
+          </div>
+          <div class="score-group">
+            <div class="score-group-title">Risk</div>
+            <div class="score-item"><div class="score-icon met"><i class="ti ti-check"></i></div><span class="score-text">Manageable sector concentration</span><i class="ti ti-chevron-right score-chevron"></i></div>
+            <div class="score-item"><div class="score-icon met"><i class="ti ti-check"></i></div><span class="score-text">No major governance flags</span><i class="ti ti-chevron-right score-chevron"></i></div>
+          </div>
+          <div class="scorecard-disclaimer">This is a summary of evidence, not a recommendation.</div>
+        </div>
+
+        <div class="action-row">
+          <div class="action-row-label">Read enough? Here's where the actual decision happens.</div>
+          <button class="action-primary"><i class="ti ti-plus"></i>Add to Portfolio</button>
+          <div class="action-link">Not the right fit? <b>Save my reasoning and pass</b></div>
+        </div>
+
+        <p class="section-title">Understanding this business</p>
+        <p class="section-sub">All core sections reviewed.</p>
+        <div class="sec-list">
+          <div class="sec-item"><div class="sec-status"><i class="ti ti-check"></i></div><span class="sec-name">The Business</span><span class="sec-tag">Core</span></div>
+          <div class="sec-item"><div class="sec-status"><i class="ti ti-check"></i></div><span class="sec-name">Financial Health</span><span class="sec-tag">Core</span></div>
+          <div class="sec-item"><div class="sec-status"><i class="ti ti-check"></i></div><span class="sec-name">Valuation</span><span class="sec-tag">Core</span></div>
+          <div class="sec-item"><div class="sec-status"><i class="ti ti-check"></i></div><span class="sec-name">Risks</span><span class="sec-tag">Core</span></div>
+          <div class="sec-item"><div class="sec-status"><i class="ti ti-check"></i></div><span class="sec-name">How It Compares</span><span class="sec-tag optional">Optional</span></div>
+        </div>
+
+        <div class="section-wrap">
+          <p class="section-title">Compare With</p>
+          <p class="section-sub">See how GTCO stacks up against similar banks.</p>
+          <div class="compare-scroll">
+            <div class="compare-card-item"><div class="compare-name">Zenith Bank</div><div class="compare-diff-kicker">What's different</div><p class="compare-diff">A more conservative lender with a larger, steadier loan book.</p></div>
+            <div class="compare-card-item"><div class="compare-name">UBA</div><div class="compare-diff-kicker">What's different</div><p class="compare-diff">Similar size, much larger pan-African footprint.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 2: HELD STATE, FIXED WITH SELL/ADD MORE ============= -->
+  <div class="frame-block">
+    <div class="frame-label">2. Held state \u2014 fixed: Add more / Sell restored</div>
+    <div class="frame-note">The gap from last message, corrected. Scorecard, section list, and Compare With all still apply after buying \u2014 the only thing that changes is the action row, which now shows the actual held-position actions instead of the not-yet-invested ones.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text"><p class="co-name">Guaranty Trust Holding Co</p><p class="co-sector">Banking</p></div>
+        </div>
+
+        <div class="decision-card">
+          <div class="position-note"><i class="ti ti-check"></i>You hold 100 shares of GTCO at ₦42.50 avg</div>
+          <div class="dc-kicker held"><i class="ti ti-shield-check"></i>You already hold this</div>
+          <h1 class="dc-title">Does GTCO still belong in your portfolio?</h1>
+          <p class="dc-copy">Placeholder: nothing in the evidence has changed since you bought — your original reasoning still holds.</p>
+        </div>
+
+        <div class="action-row">
+          <div class="action-pair">
+            <button class="action-primary"><i class="ti ti-plus"></i>Add more</button>
+            <button class="action-secondary"><i class="ti ti-minus"></i>Sell some or all</button>
+          </div>
+        </div>
+
+        <p class="section-title">Understanding this business</p>
+        <p class="section-sub">All core sections reviewed when you first invested.</p>
+        <div class="sec-list">
+          <div class="sec-item"><div class="sec-status"><i class="ti ti-check"></i></div><span class="sec-name">The Business</span><span class="sec-tag">Core</span></div>
+          <div class="sec-item"><div class="sec-status"><i class="ti ti-check"></i></div><span class="sec-name">Financial Health</span><span class="sec-tag">Core</span></div>
+        </div>
+
+        <div class="section-wrap">
+          <p class="section-title">Compare With</p>
+          <p class="section-sub">Worth knowing what else is out there.</p>
+          <div class="compare-scroll">
+            <div class="compare-card-item"><div class="compare-name">Zenith Bank</div><div class="compare-diff-kicker">What's different</div><p class="compare-diff">A more conservative lender with a larger, steadier loan book.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

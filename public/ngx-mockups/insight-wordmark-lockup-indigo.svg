@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 100">
+<g>
+<polygon points="92,50 71,86.37 56.93,54" fill="#332F86"/>
+<polygon points="71,86.37 29,86.37 50,58" fill="#5A54C4"/>
+<polygon points="29,86.37 8,50 43.07,54" fill="#332F86"/>
+<polygon points="8,50 29,13.63 43.07,46" fill="#5A54C4"/>
+<polygon points="29,13.63 71,13.63 50,42" fill="#332F86"/>
+<polygon points="71,13.63 92,50 56.93,46" fill="#5A54C4"/>
+</g>
+<text x="118" y="64" font-family="Fraunces, serif" font-weight="500" font-size="44" letter-spacing="-1.2" fill="#14181C">Insight</text>
+</svg>

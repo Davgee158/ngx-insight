@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NGX Insight — Watchlist v4 (MVP cards + quick-add shortcut)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+  :root{
+    --ink:#14181C; --ink-soft:#4B5158; --ink-mute:#8A8F94;
+    --page:#F5F5F1; --surface:#FFFFFF; --surface-tint:#EFF1EC; --border:#E4E3DA;
+    --indigo:#5A54C4; --indigo-tint:#ECEAFA; --indigo-deep:#332F86;
+    --green:#1E8E5A; --green-tint:#E6F4EC;
+    --radius-lg:24px; --radius-md:18px; --radius-sm:12px;
+    --shadow-card: 0 1px 2px rgba(20,24,28,0.03), 0 6px 18px rgba(20,24,28,0.05);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#DCDCD5;font-family:'Inter',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding:40px;}
+  .frames{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .frame-block{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .frame-label{font-size:13px;font-weight:500;color:var(--ink-soft);background:var(--surface);border:1px solid var(--border);padding:6px 14px;border-radius:999px;}
+  .frame-note{max-width:393px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;background:var(--surface);border:1px dashed var(--border);padding:10px 14px;border-radius:12px;}
+  .frame-note b{color:var(--ink);}
+  .device{width:393px;height:852px;background:var(--page);border-radius:52px;border:1px solid #C9C9C1;box-shadow:0 30px 60px rgba(0,0,0,0.18);overflow:hidden;position:relative;display:flex;flex-direction:column;}
+  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#000;border-radius:16px;z-index:30;}
+  .scroll{flex:1;overflow-y:auto;padding:60px 20px 40px;position:relative;}
+  .scroll::-webkit-scrollbar{display:none;}
+
+  .page-header{margin-bottom:22px;}
+  .page-kicker{font-size:11px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:4px;}
+  .page-title{font-family:'Fraunces',serif;font-size:24px;font-weight:500;letter-spacing:-0.015em;line-height:1.2;margin:0 0 20px;}
+
+  .co-mark{width:38px;height:38px;border-radius:10px;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .co-mark.gt{background:#F5A623;}
+  .co-mark.zb{background:#0B5F7F;}
+  .co-mark.sp{background:#1E5C3F;}
+  .watch-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;box-shadow:var(--shadow-card);display:flex;align-items:flex-start;gap:13px;margin-bottom:10px;}
+  .watch-card.needs-attention{border-left:3px solid var(--indigo);}
+  .watch-body{flex:1;min-width:0;}
+  .watch-name{font-size:14px;font-weight:600;color:var(--ink);line-height:1.2;}
+  .watch-sector{font-size:11px;color:var(--ink-mute);margin-top:1px;}
+  .watch-change{font-size:12.5px;color:var(--ink);margin-top:9px;line-height:1.45;display:flex;align-items:flex-start;gap:6px;}
+  .watch-change i{font-size:13px;color:var(--indigo-deep);flex-shrink:0;margin-top:1px;}
+  .watch-meta{font-size:11px;color:var(--ink-mute);margin-top:6px;}
+
+  /* Company list row, reused pattern from Sector View / Discover */
+  .list-title{font-family:'Fraunces',serif;font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:0 0 14px;}
+  .co-row{display:flex;align-items:center;gap:13px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;box-shadow:var(--shadow-card);margin-bottom:10px;}
+  .co-row-body{flex:1;min-width:0;}
+  .co-row-name{font-size:13.5px;font-weight:600;color:var(--ink);}
+  .co-row-sector{font-size:11px;color:var(--ink-mute);margin-top:1px;}
+  .watch-toggle{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;background:var(--surface-tint);color:var(--ink-mute);border:1px solid var(--border);}
+  .watch-toggle i{font-size:16px;}
+  .watch-toggle.added{background:var(--indigo);color:#fff;border-color:var(--indigo);}
+
+  .toast{position:absolute;bottom:24px;left:20px;right:20px;background:var(--ink);color:#fff;border-radius:var(--radius-md);padding:12px 16px;display:flex;align-items:center;gap:9px;box-shadow:0 8px 24px rgba(0,0,0,0.25);z-index:20;}
+  .toast i{font-size:15px;color:var(--green);flex-shrink:0;}
+  .toast-text{font-size:12.5px;font-weight:500;}
+</style>
+</head>
+<body>
+
+<div class="frames">
+
+  <!-- ============= FRAME 1: MVP CARDS, NO REFLECTION TIE-BACK ============= -->
+  <div class="frame-block">
+    <div class="frame-label">1. Watchlist cards — MVP, no reflection dependency</div>
+    <div class="frame-note">Reverted from v3's relevance-tied copy. Plain, qualitative change description \u2014 no raw figures, no "you marked this..." tie-back. The section-engagement line ("You reviewed...") stays, since that's just completion tracking, not reflection data.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="page-header">
+          <div class="page-kicker">Watchlist</div>
+          <h1 class="page-title">Needs attention</h1>
+        </div>
+        <div class="watch-card needs-attention">
+          <div class="co-mark gt">GT</div>
+          <div class="watch-body">
+            <div class="watch-name">Guaranty Trust Holding Co</div>
+            <div class="watch-sector">Banking</div>
+            <div class="watch-change"><i class="ti ti-file-text"></i><span>Quarterly earnings released — results beat expectations.</span></div>
+            <div class="watch-meta">2 days ago \u2022 You reviewed Valuation and Financial Health</div>
+          </div>
+        </div>
+        <div class="watch-card needs-attention">
+          <div class="co-mark zb">ZB</div>
+          <div class="watch-body">
+            <div class="watch-name">Zenith Bank</div>
+            <div class="watch-sector">Banking</div>
+            <div class="watch-change"><i class="ti ti-coin"></i><span>Interim dividend declared.</span></div>
+            <div class="watch-meta">3 days ago \u2022 You reviewed all 5 sections</div>
+          </div>
+        </div>
+        <div class="watch-card needs-attention">
+          <div class="co-mark sp">SP</div>
+          <div class="watch-body">
+            <div class="watch-name">Seplat Energy</div>
+            <div class="watch-sector">Oil &amp; Gas</div>
+            <div class="watch-change"><i class="ti ti-news"></i><span>Announced acquisition of upstream assets.</span></div>
+            <div class="watch-meta">Yesterday \u2022 You reviewed The Business only</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 2: QUICK-ADD SHORTCUT, BEFORE ============= -->
+  <div class="frame-block">
+    <div class="frame-label">2. Quick-add shortcut \u2014 on a list, before adding</div>
+    <div class="frame-note">Every company list (Sector View's full list, Discover's rows) gets this small icon \u2014 tap to add to Watchlist without opening Company Analysis at all. No navigation, no confirmation dialog.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="page-header">
+          <div class="page-kicker">Sector View</div>
+          <h1 class="page-title">All banking companies</h1>
+        </div>
+        <div class="co-row">
+          <div class="co-mark gt">GT</div>
+          <div class="co-row-body"><div class="co-row-name">Guaranty Trust Holding Co</div><div class="co-row-sector">Banking</div></div>
+          <div class="watch-toggle"><i class="ti ti-eye"></i></div>
+        </div>
+        <div class="co-row">
+          <div class="co-mark zb">ZB</div>
+          <div class="co-row-body"><div class="co-row-name">Zenith Bank</div><div class="co-row-sector">Banking</div></div>
+          <div class="watch-toggle"><i class="ti ti-eye"></i></div>
+        </div>
+        <div class="co-row">
+          <div class="co-mark sp">SP</div>
+          <div class="co-row-body"><div class="co-row-name">Access Holdings</div><div class="co-row-sector">Banking</div></div>
+          <div class="watch-toggle"><i class="ti ti-eye"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 3: QUICK-ADD SHORTCUT, AFTER ============= -->
+  <div class="frame-block">
+    <div class="frame-label">3. Quick-add shortcut \u2014 after tapping</div>
+    <div class="frame-note">Icon fills solid indigo to confirm the state, plus a small bottom toast \u2014 both quiet, both auto-dismissing, no modal, no interruption. Tapping again removes it (same toggle, reversible).</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="page-header">
+          <div class="page-kicker">Sector View</div>
+          <h1 class="page-title">All banking companies</h1>
+        </div>
+        <div class="co-row">
+          <div class="co-mark gt">GT</div>
+          <div class="co-row-body"><div class="co-row-name">Guaranty Trust Holding Co</div><div class="co-row-sector">Banking</div></div>
+          <div class="watch-toggle added"><i class="ti ti-eye-check"></i></div>
+        </div>
+        <div class="co-row">
+          <div class="co-mark zb">ZB</div>
+          <div class="co-row-body"><div class="co-row-name">Zenith Bank</div><div class="co-row-sector">Banking</div></div>
+          <div class="watch-toggle"><i class="ti ti-eye"></i></div>
+        </div>
+        <div class="co-row">
+          <div class="co-mark sp">SP</div>
+          <div class="co-row-body"><div class="co-row-name">Access Holdings</div><div class="co-row-sector">Banking</div></div>
+          <div class="watch-toggle"><i class="ti ti-eye"></i></div>
+        </div>
+      </div>
+      <div class="toast"><i class="ti ti-check"></i><span class="toast-text">Added GTCO to Watchlist</span></div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

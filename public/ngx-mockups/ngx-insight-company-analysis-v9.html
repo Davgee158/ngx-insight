@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NGX Insight — Company Analysis v9</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+  :root{
+    --ink:#14181C; --ink-soft:#4B5158; --ink-mute:#8A8F94;
+    --page:#F5F5F1; --surface:#FFFFFF; --surface-tint:#EFF1EC; --border:#E4E3DA;
+    --indigo:#5A54C4; --indigo-tint:#ECEAFA; --indigo-deep:#332F86;
+    --green:#1E8E5A; --green-tint:#E6F4EC;
+    --amber:#B7791F; --amber-tint:#FBF1DF;
+    --radius-lg:24px; --radius-md:18px; --radius-sm:12px;
+    --shadow-hero: 0 2px 4px rgba(20,24,28,0.04), 0 14px 32px rgba(20,24,28,0.08);
+    --shadow-card: 0 1px 2px rgba(20,24,28,0.03), 0 6px 18px rgba(20,24,28,0.05);
+    --shadow-sheet: 0 -8px 32px rgba(20,24,28,0.18);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#DCDCD5;font-family:'Inter',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding:40px;}
+  .frames{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .frame-block{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .frame-label{font-size:13px;font-weight:500;color:var(--ink-soft);background:var(--surface);border:1px solid var(--border);padding:6px 14px;border-radius:999px;}
+  .frame-note{max-width:393px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;background:var(--surface);border:1px dashed var(--border);padding:10px 14px;border-radius:12px;}
+  .frame-note b{color:var(--ink);}
+
+  .device{width:393px;height:852px;background:var(--page);border-radius:52px;border:1px solid #C9C9C1;box-shadow:0 30px 60px rgba(0,0,0,0.18);overflow:hidden;position:relative;display:flex;flex-direction:column;}
+  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#000;border-radius:16px;z-index:30;}
+  .scroll{flex:1;overflow-y:auto;padding:60px 20px 40px;position:relative;}
+  .scroll::-webkit-scrollbar{display:none;}
+  .device.with-sheet .scroll{overflow:hidden;}
+  .sheet-scrim{position:absolute;inset:0;background:rgba(20,24,28,0.4);z-index:15;}
+
+  .back-header{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+  .back-btn{width:36px;height:36px;border-radius:11px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);flex-shrink:0;}
+  .back-btn i{font-size:18px;}
+  .co-mark{width:36px;height:36px;border-radius:10px;background:var(--ink);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .co-id-text{flex:1;min-width:0;}
+  .co-name{font-family:'Fraunces',serif;font-size:16px;font-weight:500;margin:0;letter-spacing:-0.01em;}
+  .co-sector{font-size:11.5px;color:var(--ink-mute);margin:0;}
+
+  .decision-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-hero);padding:22px 20px;}
+  .dc-kicker{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:500;color:var(--indigo-deep);background:var(--indigo-tint);padding:5px 10px;border-radius:999px;margin-bottom:14px;}
+  .dc-kicker i{font-size:12px;}
+  .dc-title{font-family:'Fraunces',serif;font-size:20px;font-weight:500;letter-spacing:-0.01em;line-height:1.28;margin:0 0 10px;}
+  .dc-copy{font-size:13px;color:var(--ink-soft);line-height:1.5;margin:0;}
+  .action-row{display:flex;flex-direction:column;gap:8px;margin-top:18px;padding-top:18px;border-top:1px solid var(--border);}
+  .action-primary{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--ink);color:#fff;border:none;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;padding:13px;border-radius:var(--radius-sm);cursor:pointer;width:100%;}
+  .action-primary i{font-size:15px;}
+  .action-link{text-align:center;font-size:12.5px;color:var(--ink-mute);}
+  .action-link b{color:var(--indigo-deep);font-weight:500;}
+  .action-sell{background:transparent;color:var(--ink-soft);border:1px solid var(--border);}
+
+  .position-note{display:inline-flex;align-items:center;gap:6px;background:var(--green-tint);color:#0E5A3A;padding:5px 10px;border-radius:999px;font-size:11.5px;font-weight:500;margin-bottom:14px;}
+  .position-note i{font-size:12px;}
+
+  /* Sheet */
+  .sheet{position:absolute;bottom:0;left:0;right:0;background:var(--surface);border-radius:24px 24px 0 0;padding:16px 20px 24px;box-shadow:var(--shadow-sheet);z-index:20;max-height:88%;overflow-y:auto;}
+  .sheet::-webkit-scrollbar{display:none;}
+  .sheet-handle{width:36px;height:4px;background:var(--border);border-radius:999px;margin:0 auto 14px;}
+
+  /* SEGMENTED TABS — replaces the pill toggle */
+  .seg-tabs{display:flex;background:var(--surface-tint);border-radius:12px;padding:3px;margin-bottom:18px;}
+  .seg-tab{flex:1;padding:9px 10px;text-align:center;font-size:12.5px;font-weight:500;color:var(--ink-soft);border-radius:9px;cursor:pointer;}
+  .seg-tab.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,24,28,0.05), 0 2px 8px rgba(20,24,28,0.05);}
+
+  .sheet-title{font-family:'Fraunces',serif;font-size:19px;font-weight:500;letter-spacing:-0.01em;margin:0 0 4px;}
+  .sheet-sub{font-size:12.5px;color:var(--ink-mute);margin:0 0 14px;line-height:1.5;}
+
+  .form-field{margin-bottom:12px;}
+  .form-label{font-size:11.5px;font-weight:500;color:var(--ink-soft);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+  .form-hint-inline{font-size:10.5px;color:var(--ink-mute);font-weight:400;}
+  .form-input{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);background:var(--surface);}
+  .form-input.filled{background:var(--surface-tint);}
+  .form-input:focus{outline:none;border-color:var(--indigo);background:var(--surface);}
+  .form-row{display:flex;gap:10px;}
+  .form-row .form-field{flex:1;}
+
+  .calc-block{background:var(--surface-tint);border-radius:var(--radius-md);padding:14px 16px;margin:14px 0;}
+  .calc-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;}
+  .calc-row + .calc-row{border-top:1px dashed var(--border);}
+  .calc-label{font-size:12px;color:var(--ink-soft);}
+  .calc-value{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink);font-weight:500;}
+  .calc-value.small{font-size:12.5px;}
+  .calc-value.gain{color:var(--green);}
+  .calc-value.loss{color:#B75151;}
+  .impact-note{font-size:12px;color:var(--ink-soft);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);line-height:1.5;}
+  .impact-note b{color:var(--ink);font-weight:600;}
+
+  .form-submit{width:100%;padding:13px;background:var(--ink);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .form-submit i{font-size:14px;}
+  .form-hint{font-size:11px;color:var(--ink-mute);margin-top:12px;line-height:1.5;text-align:center;}
+
+  /* Sell quick picks */
+  .sell-picks{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+  .sell-pick{padding:6px 12px;border:1px solid var(--border);border-radius:999px;font-size:12px;font-weight:500;color:var(--ink-soft);cursor:pointer;background:var(--surface);}
+  .sell-pick.selected{background:var(--indigo-tint);color:var(--indigo-deep);border-color:transparent;}
+
+  /* Pass reasoning */
+  .textarea-input{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);background:var(--surface);resize:none;min-height:90px;line-height:1.5;}
+  .textarea-input:focus{outline:none;border-color:var(--indigo);}
+  .quick-reasons{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;margin-bottom:8px;}
+  .quick-reason{font-size:11.5px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--ink-soft);cursor:pointer;}
+  .quick-reason.selected{background:var(--indigo-tint);border-color:transparent;color:var(--indigo-deep);}
+  .skip-link{display:block;text-align:center;font-size:12.5px;color:var(--ink-mute);margin-top:12px;padding:10px;text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<div class="frames">
+
+  <!-- ============= FRAME 1: PLAN A PURCHASE (segmented tab active on left) ============= -->
+  <div class="frame-block">
+    <div class="frame-label">1. Plan a purchase (tab)</div>
+    <div class="frame-note">Segmented tabs replace the pill toggle. Both modes are visible at all times, so switching is obvious. Plain-English labels \u2014 no jargon leaking through from our internal names ("planner"/"recorder").</div>
+    <div class="device with-sheet">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text"><p class="co-name">Guaranty Trust Holding Co</p><p class="co-sector">Banking</p></div>
+        </div>
+        <div class="decision-card">
+          <div class="dc-kicker"><i class="ti ti-circle-check"></i>Complete picture</div>
+          <h1 class="dc-title">Here's what the evidence shows.</h1>
+        </div>
+      </div>
+      <div class="sheet-scrim"></div>
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="seg-tabs">
+          <div class="seg-tab active">Plan a purchase</div>
+          <div class="seg-tab">Log what I bought</div>
+        </div>
+        <h2 class="sheet-title">Plan your GTCO purchase</h2>
+        <p class="sheet-sub">See what you'd get for what you want to spend, then head to your broker to actually buy.</p>
+
+        <div class="form-field">
+          <label class="form-label">How much do you want to invest?</label>
+          <input class="form-input" placeholder="e.g. \u20a650,000" value="\u20a650,000" />
+        </div>
+        <div class="form-field">
+          <label class="form-label">Current price <span class="form-hint-inline">Market close, today</span></label>
+          <input class="form-input filled" value="\u20a642.50" />
+        </div>
+
+        <div class="calc-block">
+          <div class="calc-row"><span class="calc-label">You'd get</span><span class="calc-value">~1,176 shares</span></div>
+          <div class="calc-row"><span class="calc-label">At an average of</span><span class="calc-value small">\u20a642.50 per share</span></div>
+          <div class="impact-note">This would be about <b>8% of your portfolio</b> — a meaningful position but not a concentrated one.</div>
+        </div>
+
+        <button class="form-submit"><i class="ti ti-external-link"></i>Ready — open my broker</button>
+        <div class="form-hint">Once you've bought, come back and switch to "Log what I bought."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 2: LOG WHAT I BOUGHT (right tab active) ============= -->
+  <div class="frame-block">
+    <div class="frame-label">2. Log what I bought (tab)</div>
+    <div class="frame-note">Same sheet, right tab active. One-tap switch between planning and logging \u2014 no hidden state, no interpretive burden on the user.</div>
+    <div class="device with-sheet">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text"><p class="co-name">Guaranty Trust Holding Co</p><p class="co-sector">Banking</p></div>
+        </div>
+        <div class="decision-card">
+          <div class="dc-kicker"><i class="ti ti-circle-check"></i>Complete picture</div>
+          <h1 class="dc-title">Here's what the evidence shows.</h1>
+        </div>
+      </div>
+      <div class="sheet-scrim"></div>
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="seg-tabs">
+          <div class="seg-tab">Plan a purchase</div>
+          <div class="seg-tab active">Log what I bought</div>
+        </div>
+        <h2 class="sheet-title">Log your GTCO purchase</h2>
+        <p class="sheet-sub">Just enough to keep your Portfolio in sync with what you actually own.</p>
+
+        <div class="form-field">
+          <label class="form-label">How many shares?</label>
+          <input class="form-input" placeholder="e.g. 100" />
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label">Average price paid (\u20a6) <span class="form-hint-inline">Market close</span></label>
+            <input class="form-input filled" value="\u20a642.50" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">When?</label>
+            <input class="form-input" value="Today" />
+          </div>
+        </div>
+
+        <button class="form-submit">Add to Portfolio<i class="ti ti-check"></i></button>
+        <div class="form-hint">Price is pre-filled from today's close \u2014 adjust to whatever your broker actually charged.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 3: SELL FLOW ============= -->
+  <div class="frame-block">
+    <div class="frame-label">3. Sell some or all of a position</div>
+    <div class="frame-note">New. Reached from a "Sell some / all" secondary action on the hub for held positions. Quick picks (25% / 50% / 75% / All) let common cases resolve in one tap; specific-quantity input for anything else. Shows realized gain/loss inline \u2014 factual, not celebratory.</div>
+    <div class="device with-sheet">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text"><p class="co-name">Guaranty Trust Holding Co</p><p class="co-sector">Banking</p></div>
+        </div>
+        <div class="decision-card">
+          <div class="position-note"><i class="ti ti-check"></i>You hold 500 shares of GTCO at \u20a638.20 avg</div>
+          <div class="dc-kicker"><i class="ti ti-circle-check"></i>Complete picture</div>
+          <h1 class="dc-title">Here's what the evidence shows.</h1>
+          <div class="action-row">
+            <button class="action-primary"><i class="ti ti-plus"></i>Add more</button>
+            <button class="action-primary action-sell"><i class="ti ti-minus"></i>Sell some or all</button>
+          </div>
+        </div>
+      </div>
+      <div class="sheet-scrim"></div>
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="seg-tabs">
+          <div class="seg-tab">Plan a sale</div>
+          <div class="seg-tab active">Log a sale</div>
+        </div>
+        <h2 class="sheet-title">Log your GTCO sale</h2>
+        <p class="sheet-sub">You held 500 shares at \u20a638.20 average. How much did you sell?</p>
+
+        <div class="form-field">
+          <label class="form-label">How many shares did you sell?</label>
+          <div class="sell-picks">
+            <div class="sell-pick">25% (125)</div>
+            <div class="sell-pick selected">50% (250)</div>
+            <div class="sell-pick">75% (375)</div>
+            <div class="sell-pick">All (500)</div>
+          </div>
+          <input class="form-input" placeholder="Or type a specific number" value="250" />
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label">Average price sold at (\u20a6) <span class="form-hint-inline">Market close</span></label>
+            <input class="form-input filled" value="\u20a642.50" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">When?</label>
+            <input class="form-input" value="Today" />
+          </div>
+        </div>
+
+        <div class="calc-block">
+          <div class="calc-row"><span class="calc-label">Realized proceeds</span><span class="calc-value">\u20a610,625</span></div>
+          <div class="calc-row"><span class="calc-label">Cost basis of sold shares</span><span class="calc-value small">\u20a69,550</span></div>
+          <div class="calc-row"><span class="calc-label">Realized gain/loss</span><span class="calc-value gain">+\u20a61,075</span></div>
+          <div class="impact-note">You'd still hold <b>250 shares</b> after this — position size drops from 8% to about 4% of your portfolio.</div>
+        </div>
+
+        <button class="form-submit">Record sale<i class="ti ti-check"></i></button>
+        <div class="form-hint">Real prices vary — adjust to match what your broker actually paid you.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= FRAME 4: PASS REASONING — skippable ============= -->
+  <div class="frame-block">
+    <div class="frame-label">4. "Save my reasoning and pass" — now skippable</div>
+    <div class="frame-note">Small change from v8 but a real one: <b>"Skip \u2014 just record my pass"</b> link at the bottom means the user can register the pass without writing anything. Decision Journal gets the fact of a pass, no reasoning captured. Never a wall.</div>
+    <div class="device with-sheet">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text"><p class="co-name">Guaranty Trust Holding Co</p><p class="co-sector">Banking</p></div>
+        </div>
+        <div class="decision-card">
+          <div class="dc-kicker"><i class="ti ti-circle-check"></i>Complete picture</div>
+          <h1 class="dc-title">Here's what the evidence shows.</h1>
+        </div>
+      </div>
+      <div class="sheet-scrim"></div>
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <h2 class="sheet-title">Save your reasoning</h2>
+        <p class="sheet-sub">Deciding not to invest is a real decision too. A short note now makes it easier to remember why later \u2014 or skip it entirely.</p>
+
+        <div class="form-field">
+          <label class="form-label">What led you to pass?</label>
+          <div class="quick-reasons">
+            <div class="quick-reason selected">Valuation feels stretched</div>
+            <div class="quick-reason">Not enough conviction yet</div>
+            <div class="quick-reason">Prefer to compare with peers</div>
+            <div class="quick-reason">Risks concern me</div>
+            <div class="quick-reason">Not right for my portfolio</div>
+          </div>
+          <textarea class="textarea-input" placeholder="Add your own words (optional)&#10;&#10;e.g. 'Solid business but the multiple is too rich for me right now.'"></textarea>
+        </div>
+
+        <button class="form-submit">Save to Decision Journal<i class="ti ti-check"></i></button>
+        <a class="skip-link">Skip — just record my pass</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

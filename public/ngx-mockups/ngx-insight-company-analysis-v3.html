@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NGX Insight — Company Analysis v3 (relationship states)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+  :root{
+    --ink:#14181C; --ink-soft:#4B5158; --ink-mute:#8A8F94;
+    --page:#F5F5F1; --surface:#FFFFFF; --surface-tint:#EFF1EC; --border:#E4E3DA;
+    --indigo:#5A54C4; --indigo-tint:#ECEAFA; --indigo-deep:#332F86;
+    --green:#1E8E5A; --green-tint:#E6F4EC;
+    --amber:#B7791F; --amber-tint:#FBF1DF;
+    --radius-lg:24px; --radius-md:18px; --radius-sm:12px;
+    --shadow-hero: 0 2px 4px rgba(20,24,28,0.04), 0 14px 32px rgba(20,24,28,0.08);
+    --shadow-card: 0 1px 2px rgba(20,24,28,0.03), 0 6px 18px rgba(20,24,28,0.05);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#DCDCD5;font-family:'Inter',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding:40px;}
+  .frames{display:flex;gap:40px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .frame-block{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .frame-label{font-size:13px;font-weight:500;color:var(--ink-soft);background:var(--surface);border:1px solid var(--border);padding:6px 14px;border-radius:999px;}
+  .frame-note{max-width:393px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;background:var(--surface);border:1px dashed var(--border);padding:10px 14px;border-radius:12px;}
+  .frame-note b{color:var(--ink);}
+
+  .device{width:393px;height:852px;background:var(--page);border-radius:52px;border:1px solid #C9C9C1;box-shadow:0 30px 60px rgba(0,0,0,0.18);overflow:hidden;position:relative;display:flex;flex-direction:column;}
+  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#000;border-radius:16px;z-index:30;}
+  .scroll{flex:1;overflow-y:auto;padding:60px 20px 40px;}
+  .scroll::-webkit-scrollbar{display:none;}
+
+  .back-header{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+  .back-btn{width:36px;height:36px;border-radius:11px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);flex-shrink:0;}
+  .back-btn i{font-size:18px;}
+  .co-mark{width:36px;height:36px;border-radius:10px;background:var(--ink);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .co-id-text{flex:1;min-width:0;}
+  .co-name{font-family:'Fraunces',serif;font-size:16px;font-weight:500;margin:0;letter-spacing:-0.01em;}
+  .co-sector{font-size:11.5px;color:var(--ink-mute);margin:0;}
+  .relationship-chip{font-size:10.5px;font-weight:600;padding:4px 9px;border-radius:999px;background:var(--surface-tint);color:var(--ink-mute);flex-shrink:0;}
+
+  .decision-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-hero);padding:22px 20px;margin-bottom:28px;}
+  .dc-kicker{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:500;color:var(--indigo-deep);background:var(--indigo-tint);padding:5px 10px;border-radius:999px;margin-bottom:14px;}
+  .dc-kicker i{font-size:12px;}
+  .dc-title{font-family:'Fraunces',serif;font-size:20px;font-weight:500;letter-spacing:-0.01em;line-height:1.28;margin:0 0 10px;}
+  .dc-copy{font-size:13px;color:var(--ink-soft);line-height:1.5;margin:0;}
+  .dc-copy b{color:var(--ink);font-weight:500;}
+  .dc-progress-row{display:flex;align-items:center;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);}
+  .dc-progress-dots{display:flex;gap:5px;}
+  .dc-dot{width:7px;height:7px;border-radius:50%;background:var(--indigo);}
+  .dc-dot.pending{background:var(--surface-tint);border:1.5px solid var(--border);}
+  .dc-progress-text{font-size:12px;color:var(--ink-mute);margin-left:2px;}
+
+  /* Original-view reference — for the Held state, ties to Decision Journal */
+  .original-view{background:var(--surface-tint);border-radius:var(--radius-sm);padding:12px 14px;margin-top:16px;}
+  .original-view-kicker{font-size:10px;font-weight:600;letter-spacing:0.03em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:5px;}
+  .original-view-text{font-size:12.5px;color:var(--ink-soft);line-height:1.4;font-style:italic;}
+
+  /* Action rows — the thing that was missing */
+  .action-row{display:flex;flex-direction:column;gap:8px;margin-top:18px;padding-top:18px;border-top:1px solid var(--border);}
+  .action-primary{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--ink);color:#fff;border:none;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;padding:13px;border-radius:var(--radius-sm);cursor:pointer;width:100%;}
+  .action-primary i{font-size:15px;}
+  .action-secondary{display:flex;align-items:center;justify-content:center;gap:6px;background:transparent;color:var(--ink-soft);border:1px solid var(--border);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:11px;border-radius:var(--radius-sm);cursor:pointer;width:100%;}
+  .action-link{text-align:center;font-size:12.5px;color:var(--ink-mute);margin-top:2px;}
+  .action-link b{color:var(--indigo-deep);font-weight:500;}
+
+  .section-title{font-family:'Fraunces',serif;font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:0 0 4px;}
+  .section-sub{font-size:12px;color:var(--ink-mute);margin:0 0 14px;}
+  .sec-list{display:flex;flex-direction:column;gap:10px;}
+  .sec-item{display:flex;align-items:center;gap:13px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:15px 16px;box-shadow:var(--shadow-card);}
+  .sec-item.recommended{border-color:var(--indigo);box-shadow:0 0 0 1px var(--indigo), var(--shadow-card);}
+  .sec-item.updated{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber), var(--shadow-card);}
+  .sec-status{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .sec-status.done{background:var(--green-tint);color:#0E5A3A;}
+  .sec-status.next{background:var(--indigo);color:#fff;}
+  .sec-status.todo{background:var(--surface-tint);color:var(--ink-mute);}
+  .sec-status i{font-size:15px;}
+  .sec-body{flex:1;min-width:0;}
+  .sec-name-row{display:flex;align-items:center;gap:7px;margin-bottom:2px;}
+  .sec-name{font-size:13.5px;font-weight:600;color:var(--ink);}
+  .sec-tag{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.03em;color:var(--indigo-deep);background:var(--indigo-tint);padding:2px 6px;border-radius:5px;}
+  .sec-tag.optional{color:var(--ink-mute);background:var(--surface-tint);}
+  .sec-tag.updated{color:var(--amber);background:var(--amber-tint);}
+  .sec-desc{font-size:12px;color:var(--ink-mute);line-height:1.4;}
+  .sec-chevron{color:var(--ink-mute);font-size:16px;flex-shrink:0;}
+  .sec-start-badge{font-size:10.5px;font-weight:600;color:var(--indigo-deep);margin-top:2px;}
+
+  .section-wrap{margin-top:30px;}
+  .compare-scroll{display:flex;gap:12px;overflow-x:auto;margin:0 -20px;padding:0 20px 4px;scrollbar-width:none;}
+  .compare-scroll::-webkit-scrollbar{display:none;}
+  .compare-card-item{flex:0 0 220px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;box-shadow:var(--shadow-card);display:flex;flex-direction:column;gap:11px;}
+  .compare-head{display:flex;align-items:center;gap:10px;}
+  .compare-name{font-size:13.5px;font-weight:600;}
+  .compare-sector{font-size:11px;color:var(--ink-mute);}
+  .compare-diff-kicker{font-size:10.5px;color:var(--ink-mute);font-weight:500;}
+  .compare-diff{font-size:12.5px;color:var(--ink);line-height:1.5;margin:0;}
+  .compare-foot{display:flex;align-items:center;justify-content:space-between;padding-top:11px;border-top:1px solid var(--border);}
+  .compare-cta{font-size:12.5px;font-weight:500;color:var(--indigo-deep);display:flex;align-items:center;gap:3px;}
+  .compare-cta i{font-size:13px;}
+  .compare-time{font-size:11px;color:var(--ink-mute);}
+</style>
+</head>
+<body>
+
+<div class="frames">
+
+  <!-- ============= STATE: NO RELATIONSHIP ============= -->
+  <div class="frame-block">
+    <div class="frame-label">1. No relationship — just exploring</div>
+    <div class="frame-note">Arrived from Discover/Sector View, no Watchlist or Portfolio entry exists. No decision pressure, no locked thesis language. Progress starts at 0, recommended-next correctly points to "The Business." <b>Compare With hidden</b> — too many exit doors before the user has even started.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text">
+            <p class="co-name">Guaranty Trust Holding Co</p>
+            <p class="co-sector">Banking</p>
+          </div>
+        </div>
+
+        <div class="decision-card">
+          <div class="dc-kicker"><i class="ti ti-compass"></i>Just exploring</div>
+          <h1 class="dc-title">Understanding GTCO.</h1>
+          <p class="dc-copy">No pressure to decide anything yet. Work through what interests you, at your own pace.</p>
+          <div class="action-row">
+            <button class="action-secondary"><i class="ti ti-eye"></i>Add to Watchlist</button>
+            <div class="action-link">Already own this? <b>Add to Portfolio</b></div>
+          </div>
+        </div>
+
+        <p class="section-title">Understanding this business</p>
+        <p class="section-sub">Work through these in any order — we'll just point you to what's next.</p>
+
+        <div class="sec-list">
+          <div class="sec-item recommended">
+            <div class="sec-status next"><i class="ti ti-arrow-right"></i></div>
+            <div class="sec-body">
+              <div class="sec-name-row"><span class="sec-name">The Business</span><span class="sec-tag">Core</span></div>
+              <div class="sec-desc">What it does, who its customers are, and how it makes money</div>
+              <div class="sec-start-badge">Recommended next</div>
+            </div>
+            <i class="ti ti-chevron-right sec-chevron"></i>
+          </div>
+          <div class="sec-item">
+            <div class="sec-status todo"><i class="ti ti-point"></i></div>
+            <div class="sec-body"><div class="sec-name-row"><span class="sec-name">Financial Health</span><span class="sec-tag">Core</span></div><div class="sec-desc">Revenue, profit, and debt over the last few years</div></div>
+            <i class="ti ti-chevron-right sec-chevron"></i>
+          </div>
+          <div class="sec-item">
+            <div class="sec-status todo"><i class="ti ti-point"></i></div>
+            <div class="sec-body"><div class="sec-name-row"><span class="sec-name">Valuation</span><span class="sec-tag">Core</span></div><div class="sec-desc">Whether the current price looks fair, cheap, or expensive</div></div>
+            <i class="ti ti-chevron-right sec-chevron"></i>
+          </div>
+          <div class="sec-item">
+            <div class="sec-status todo"><i class="ti ti-point"></i></div>
+            <div class="sec-body"><div class="sec-name-row"><span class="sec-name">Risks</span><span class="sec-tag">Core</span></div><div class="sec-desc">What could go wrong, and how likely it is</div></div>
+            <i class="ti ti-chevron-right sec-chevron"></i>
+          </div>
+          <div class="sec-item">
+            <div class="sec-status todo"><i class="ti ti-point"></i></div>
+            <div class="sec-body"><div class="sec-name-row"><span class="sec-name">How It Compares</span><span class="sec-tag optional">Optional</span></div><div class="sec-desc">How this business stacks up against others in its sector</div></div>
+            <i class="ti ti-chevron-right sec-chevron"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= STATE: WATCHING — IN PROGRESS ============= -->
+  <div class="frame-block">
+    <div class="frame-label">2. Watching — in progress</div>
+    <div class="frame-note">In Watchlist, actively researching, thesis not yet ready. This is the v2 framing, unchanged — it's the correct one for this specific state.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text">
+            <p class="co-name">Guaranty Trust Holding Co</p>
+            <p class="co-sector">Banking</p>
+          </div>
+          <div class="relationship-chip">Watching</div>
+        </div>
+
+        <div class="decision-card">
+          <div class="dc-kicker"><i class="ti ti-lock"></i>Your investment thesis</div>
+          <h1 class="dc-title">Not ready yet — a few sections still needed.</h1>
+          <p class="dc-copy">Once the core sections below are reviewed, we'll help you form a conclusion on whether this business belongs in your portfolio.</p>
+          <div class="dc-progress-row">
+            <div class="dc-progress-dots">
+              <div class="dc-dot"></div><div class="dc-dot"></div>
+              <div class="dc-dot pending"></div><div class="dc-dot pending"></div><div class="dc-dot pending"></div>
+            </div>
+            <span class="dc-progress-text">2 of 5 core sections reviewed</span>
+          </div>
+        </div>
+
+        <p class="section-title">Understanding this business</p>
+        <p class="section-sub">Work through these in any order — we'll just point you to what's next.</p>
+        <div class="sec-list">
+          <div class="sec-item"><div class="sec-status done"><i class="ti ti-check"></i></div><div class="sec-body"><div class="sec-name-row"><span class="sec-name">The Business</span><span class="sec-tag">Core</span></div><div class="sec-desc">What it does, who its customers are, and how it makes money</div></div><i class="ti ti-chevron-right sec-chevron"></i></div>
+          <div class="sec-item"><div class="sec-status done"><i class="ti ti-check"></i></div><div class="sec-body"><div class="sec-name-row"><span class="sec-name">Financial Health</span><span class="sec-tag">Core</span></div><div class="sec-desc">Revenue, profit, and debt over the last few years</div></div><i class="ti ti-chevron-right sec-chevron"></i></div>
+          <div class="sec-item recommended"><div class="sec-status next"><i class="ti ti-arrow-right"></i></div><div class="sec-body"><div class="sec-name-row"><span class="sec-name">Valuation</span><span class="sec-tag">Core</span></div><div class="sec-desc">Whether the current price looks fair, cheap, or expensive</div><div class="sec-start-badge">Recommended next</div></div><i class="ti ti-chevron-right sec-chevron"></i></div>
+          <div class="sec-item"><div class="sec-status todo"><i class="ti ti-point"></i></div><div class="sec-body"><div class="sec-name-row"><span class="sec-name">Risks</span><span class="sec-tag">Core</span></div><div class="sec-desc">What could go wrong, and how likely it is</div></div><i class="ti ti-chevron-right sec-chevron"></i></div>
+          <div class="sec-item"><div class="sec-status todo"><i class="ti ti-point"></i></div><div class="sec-body"><div class="sec-name-row"><span class="sec-name">How It Compares</span><span class="sec-tag optional">Optional</span></div><div class="sec-desc">How this business stacks up against others in its sector</div></div><i class="ti ti-chevron-right sec-chevron"></i></div>
+        </div>
+
+        <div class="section-wrap">
+          <p class="section-title">Compare With</p>
+          <p class="section-sub">See how GTCO stacks up against similar banks.</p>
+          <div class="compare-scroll">
+            <div class="compare-card-item"><div class="compare-head"><div class="co-mark">ZB</div><div><div class="compare-name">Zenith Bank</div><div class="compare-sector">Banking</div></div></div><div><div class="compare-diff-kicker">What's different</div><p class="compare-diff">A more conservative lender with a larger, steadier loan book.</p></div><div class="compare-foot"><span class="compare-time">6 min read</span><div class="compare-cta">Compare<i class="ti ti-arrow-right"></i></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= STATE: WATCHING — READY ============= -->
+  <div class="frame-block">
+    <div class="frame-label">3. Watching — thesis ready</div>
+    <div class="frame-note">All core sections reviewed. Thesis unlocks, but stays a synthesis of evidence, not an instruction. Two real actions now exist: <b>Add to Portfolio</b> (declares a position, always available, never gated) and a secondary path for a <b>deliberate pass</b> — this is the "no" reasoning we flagged should be preserved for Decision Journal too, not just the yeses.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text">
+            <p class="co-name">Guaranty Trust Holding Co</p>
+            <p class="co-sector">Banking</p>
+          </div>
+          <div class="relationship-chip">Watching</div>
+        </div>
+
+        <div class="decision-card">
+          <div class="dc-kicker"><i class="ti ti-circle-check"></i>Your investment thesis is ready</div>
+          <h1 class="dc-title">Here's what the evidence shows.</h1>
+          <p class="dc-copy">Placeholder: consistent profitability, a reasonable valuation relative to the sector, and manageable risk exposure — based on the sections you reviewed.</p>
+          <div class="action-row">
+            <button class="action-primary"><i class="ti ti-plus"></i>Add to Portfolio</button>
+            <div class="action-link">Not the right fit? <b>Save my reasoning and pass</b></div>
+          </div>
+        </div>
+
+        <p class="section-title">Understanding this business</p>
+        <p class="section-sub">All core sections reviewed.</p>
+        <div class="sec-list">
+          <div class="sec-item"><div class="sec-status done"><i class="ti ti-check"></i></div><div class="sec-body"><div class="sec-name-row"><span class="sec-name">The Business</span><span class="sec-tag">Core</span></div></div></div>
+          <div class="sec-item"><div class="sec-status done"><i class="ti ti-check"></i></div><div class="sec-body"><div class="sec-name-row"><span class="sec-name">Financial Health</span><span class="sec-tag">Core</span></div></div></div>
+          <div class="sec-item"><div class="sec-status done"><i class="ti ti-check"></i></div><div class="sec-body"><div class="sec-name-row"><span class="sec-name">Valuation</span><span class="sec-tag">Core</span></div></div></div>
+          <div class="sec-item"><div class="sec-status done"><i class="ti ti-check"></i></div><div class="sec-body"><div class="sec-name-row"><span class="sec-name">Risks</span><span class="sec-tag">Core</span></div></div></div>
+          <div class="sec-item"><div class="sec-status todo"><i class="ti ti-point"></i></div><div class="sec-body"><div class="sec-name-row"><span class="sec-name">How It Compares</span><span class="sec-tag optional">Optional</span></div></div></div>
+        </div>
+
+        <div class="section-wrap">
+          <p class="section-title">Compare With</p>
+          <p class="section-sub">Worth a look before you decide.</p>
+          <div class="compare-scroll">
+            <div class="compare-card-item"><div class="compare-head"><div class="co-mark">ZB</div><div><div class="compare-name">Zenith Bank</div><div class="compare-sector">Banking</div></div></div><div><div class="compare-diff-kicker">What's different</div><p class="compare-diff">A more conservative lender with a larger, steadier loan book.</p></div><div class="compare-foot"><span class="compare-time">6 min read</span><div class="compare-cta">Compare<i class="ti ti-arrow-right"></i></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= STATE: HELD ============= -->
+  <div class="frame-block">
+    <div class="frame-label">4. Held — existing investor</div>
+    <div class="frame-note">In Portfolio. Framing shifts entirely to reconsideration, not purchase. Shows <b>Your Original View</b> (the Decision Journal artifact) alongside what's changed. Actions are "still confident" (reaffirm, low friction) or an honest path toward reconsidering — never a push in either direction.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="co-mark">GT</div>
+          <div class="co-id-text">
+            <p class="co-name">Guaranty Trust Holding Co</p>
+            <p class="co-sector">Banking</p>
+          </div>
+          <div class="relationship-chip" style="background:var(--green-tint);color:#0E5A3A;">Held</div>
+        </div>
+
+        <div class="decision-card">
+          <div class="dc-kicker"><i class="ti ti-shield-check"></i>You already hold this</div>
+          <h1 class="dc-title">Does GTCO still belong in your portfolio?</h1>
+          <p class="dc-copy">Earnings released Tuesday — <b>nothing here changes your thesis.</b></p>
+
+          <div class="original-view">
+            <div class="original-view-kicker">Your original view</div>
+            <div class="original-view-text">"Strong margins and consistent dividends made this a core holding."</div>
+          </div>
+
+          <div class="action-row">
+            <button class="action-secondary"><i class="ti ti-check"></i>Still confident — no action needed</button>
+            <div class="action-link">Thinking about it? <b>See what's changed and reconsider</b></div>
+          </div>
+        </div>
+
+        <p class="section-title">Understanding this business</p>
+        <p class="section-sub">All core sections reviewed when you first invested.</p>
+        <div class="sec-list">
+          <div class="sec-item"><div class="sec-status done"><i class="ti ti-check"></i></div><div class="sec-body"><div class="sec-name-row"><span class="sec-name">The Business</span><span class="sec-tag">Core</span></div></div></div>
+          <div class="sec-item updated"><div class="sec-status done"><i class="ti ti-check"></i></div><div class="sec-body"><div class="sec-name-row"><span class="sec-name">Financial Health</span><span class="sec-tag updated">Updated</span></div><div class="sec-desc">New earnings released — worth a second look</div></div><i class="ti ti-chevron-right sec-chevron"></i></div>
+          <div class="sec-item"><div class="sec-status done"><i class="ti ti-check"></i></div><div class="sec-body"><div class="sec-name-row"><span class="sec-name">Valuation</span><span class="sec-tag">Core</span></div></div></div>
+          <div class="sec-item"><div class="sec-status done"><i class="ti ti-check"></i></div><div class="sec-body"><div class="sec-name-row"><span class="sec-name">Risks</span><span class="sec-tag">Core</span></div></div></div>
+          <div class="sec-item"><div class="sec-status done"><i class="ti ti-check"></i></div><div class="sec-body"><div class="sec-name-row"><span class="sec-name">How It Compares</span><span class="sec-tag optional">Optional</span></div></div></div>
+        </div>
+
+        <div class="section-wrap">
+          <p class="section-title">Compare With</p>
+          <p class="section-sub">Worth knowing what else is out there.</p>
+          <div class="compare-scroll">
+            <div class="compare-card-item"><div class="compare-head"><div class="co-mark">ZB</div><div><div class="compare-name">Zenith Bank</div><div class="compare-sector">Banking</div></div></div><div><div class="compare-diff-kicker">What's different</div><p class="compare-diff">A more conservative lender with a larger, steadier loan book.</p></div><div class="compare-foot"><span class="compare-time">6 min read</span><div class="compare-cta">Compare<i class="ti ti-arrow-right"></i></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NGX Insight — Sector View v4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+  :root{
+    --ink:#14181C; --ink-soft:#4B5158; --ink-mute:#8A8F94;
+    --page:#F5F5F1; --surface:#FFFFFF; --surface-tint:#EFF1EC; --border:#E4E3DA;
+    --indigo:#5A54C4; --indigo-tint:#ECEAFA; --indigo-deep:#332F86;
+    --green:#1E8E5A; --green-tint:#E6F4EC;
+    --amber:#B7791F; --amber-tint:#FBF1DF;
+    --radius-lg:24px; --radius-md:18px; --radius-sm:12px;
+    --shadow-hero: 0 2px 4px rgba(20,24,28,0.04), 0 14px 32px rgba(20,24,28,0.08);
+    --shadow-card: 0 1px 2px rgba(20,24,28,0.03), 0 6px 18px rgba(20,24,28,0.05);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#DCDCD5;font-family:'Inter',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding:40px;}
+  .frames{display:flex;gap:40px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .frame-block{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .frame-label{font-size:13px;font-weight:500;color:var(--ink-soft);background:var(--surface);border:1px solid var(--border);padding:6px 14px;border-radius:999px;}
+  .frame-note{max-width:393px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;background:var(--surface);border:1px dashed var(--border);padding:10px 14px;border-radius:12px;}
+  .frame-note b{color:var(--ink);}
+
+  .device{width:393px;height:852px;background:var(--page);border-radius:52px;border:1px solid #C9C9C1;box-shadow:0 30px 60px rgba(0,0,0,0.18);overflow:hidden;position:relative;display:flex;flex-direction:column;}
+  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#000;border-radius:16px;z-index:30;}
+  .scroll{flex:1;overflow-y:auto;padding:60px 20px 40px;}
+  .scroll::-webkit-scrollbar{display:none;}
+
+  .back-header{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+  .back-btn{width:36px;height:36px;border-radius:11px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);flex-shrink:0;}
+  .back-btn i{font-size:18px;}
+  .sector-pill{display:inline-flex;align-items:center;gap:6px;background:var(--indigo-tint);color:var(--indigo-deep);padding:8px 13px;border-radius:999px;font-size:12.5px;font-weight:500;}
+  .sector-pill i{font-size:13px;}
+
+  /* Hero — curiosity-first, not textbook */
+  .hero{margin-bottom:20px;}
+  .hero-title{font-family:'Fraunces',serif;font-size:26px;font-weight:500;letter-spacing:-0.01em;line-height:1.2;margin:0 0 10px;}
+  .hero-desc{font-size:13.5px;color:var(--ink-soft);line-height:1.6;margin:0;}
+  .hero-desc b{color:var(--ink);font-weight:600;}
+
+  .search-bar{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:11px 14px;box-shadow:var(--shadow-card);margin:18px 0 4px;}
+  .search-bar i{font-size:16px;color:var(--ink-mute);}
+  .search-bar input{border:none;outline:none;background:transparent;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);flex:1;}
+  .search-bar input::placeholder{color:var(--ink-mute);}
+
+  .section-head{margin:28px 0 12px;}
+  .section-title{font-family:'Fraunces',serif;font-size:18px;font-weight:500;letter-spacing:-0.01em;margin:0 0 3px;}
+  .section-sub{font-size:12px;color:var(--ink-mute);margin:0;line-height:1.4;}
+
+  /* Good places to start — now first, no framework has been introduced yet */
+  .start-list{display:flex;flex-direction:column;gap:12px;}
+  .start-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;box-shadow:var(--shadow-card);display:flex;flex-direction:column;gap:11px;transition:transform 0.35s ease, box-shadow 0.35s ease;position:relative;}
+  .start-card.matched{border-color:var(--indigo);box-shadow:0 0 0 1px var(--indigo), var(--shadow-card);}
+  .matched-tag{position:absolute;top:-9px;right:14px;background:var(--indigo);color:#fff;font-size:10px;font-weight:600;padding:3px 9px;border-radius:999px;letter-spacing:0.02em;}
+  .start-head{display:flex;align-items:center;gap:11px;}
+  .co-mark{width:32px;height:32px;border-radius:9px;background:var(--ink);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .co-name{font-size:13.5px;font-weight:600;}
+  .co-sector{font-size:11px;color:var(--ink-mute);}
+  .start-reason-kicker{font-size:10.5px;color:var(--ink-mute);font-weight:500;}
+  .start-reason{font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.5;margin:0 0 8px;}
+  .learn-line{font-size:12px;color:var(--ink-soft);line-height:1.45;}
+  .learn-line b{color:var(--indigo-deep);font-weight:600;}
+  .start-foot{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border);}
+  .start-foot-time{font-size:11.5px;color:var(--ink-mute);}
+  .start-foot-cta{font-size:12.5px;font-weight:500;color:var(--indigo-deep);display:flex;align-items:center;gap:3px;}
+  .start-foot-cta i{font-size:13px;}
+
+  /* Notice prompt — the engine, not the reward. Sits right after the three examples. */
+  .notice-card{background:var(--indigo-tint);border-radius:var(--radius-lg);padding:20px 18px;margin-top:20px;}
+  .notice-kicker{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--indigo-deep);margin-bottom:10px;}
+  .notice-kicker i{font-size:12px;}
+  .notice-title{font-family:'Fraunces',serif;font-size:17px;font-weight:500;letter-spacing:-0.01em;line-height:1.28;margin:0 0 14px;color:var(--ink);}
+  .notice-options{display:flex;flex-direction:column;gap:8px;}
+  .notice-option{background:var(--surface);border:1px solid rgba(90,84,196,0.18);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;font-weight:500;color:var(--ink);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background 0.2s ease;}
+  .notice-option:active{background:var(--indigo-tint);}
+  .notice-option i{font-size:14px;color:var(--indigo-deep);}
+
+  /* Reveal — the framework, arriving as the answer to what the user just noticed */
+  .reveal{display:none;margin-top:22px;}
+  .reveal.shown{display:block;animation:fadeIn 0.4s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .reveal-kicker{font-size:11px;font-weight:500;color:var(--ink-mute);margin-bottom:8px;}
+  .reveal-kicker b{color:var(--indigo-deep);}
+  .compare-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:18px 20px;box-shadow:var(--shadow-card);}
+  .compare-title{font-family:'Fraunces',serif;font-size:16px;font-weight:500;letter-spacing:-0.01em;line-height:1.28;margin:0 0 14px;}
+  .compare-list{display:flex;flex-direction:column;gap:10px;}
+  .compare-item{display:flex;align-items:flex-start;gap:10px;padding:8px;margin:0 -8px;border-radius:10px;transition:background 0.3s ease;}
+  .compare-item.pinned{background:var(--indigo-tint);}
+  .compare-marker{width:22px;height:22px;border-radius:7px;background:var(--indigo-tint);color:var(--indigo-deep);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .compare-item.pinned .compare-marker{background:var(--surface);}
+  .compare-marker i{font-size:12px;}
+  .compare-item-body{flex:1;min-width:0;}
+  .compare-item-name{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;}
+  .pinned-tag{font-size:9px;font-weight:600;letter-spacing:0.03em;text-transform:uppercase;color:var(--indigo-deep);}
+  .compare-item-note{font-size:11.5px;color:var(--ink-mute);line-height:1.4;}
+
+  .company-list{display:flex;flex-direction:column;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-card);}
+  .co-row{display:flex;align-items:center;gap:12px;padding:13px 15px;border-top:1px solid var(--border);}
+  .co-row:first-child{border-top:none;}
+  .co-row-body{flex:1;min-width:0;}
+  .co-row-name{font-size:13px;font-weight:600;}
+  .co-row-note{font-size:11.5px;color:var(--ink-mute);margin-top:1px;line-height:1.4;}
+  .co-row i{color:var(--ink-mute);font-size:15px;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<div class="frames">
+
+  <div class="frame-block">
+    <div class="frame-label">Sector View v4 — fast-path onboarding, framework always visible</div>
+    <div class="frame-note">Reordered: the compare framework now sits right after the hero, <b>before</b> any companies appear \u2014 teaching the lens first, then applying it. Previously it sat between "Good places to start" and "All banking companies," which read as banks \u2192 framework \u2192 more banks, an odd sandwich. Reversed the gated "Notice something?" mechanic from v3 \u2014 this page's job is getting a first-time user to a company fast, with a full skip-everything path always available. "Research" renamed to "Analyze" throughout.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header">
+          <div class="back-btn"><i class="ti ti-arrow-left"></i></div>
+          <div class="sector-pill"><i class="ti ti-building-bank"></i>Banking</div>
+        </div>
+
+        <div class="hero">
+          <h1 class="hero-title">Banking</h1>
+          <p class="hero-desc">Every bank looks the same from the outside — deposits in, loans out. But some create <b>far more value</b> than others from that same simple formula. This sector is about understanding why.</p>
+        </div>
+
+        <div class="search-bar">
+          <i class="ti ti-search"></i>
+          <input placeholder="Search banking companies" />
+        </div>
+
+        <div class="reveal shown" id="reveal">
+          <div class="compare-card">
+            <h2 class="compare-title">A simple way to compare banks.</h2>
+            <div class="compare-list" id="compareList"></div>
+          </div>
+        </div>
+
+        <div class="section-head">
+          <h2 class="section-title">Good places to start</h2>
+          <p class="section-sub">Three companies, each teaching something different about banking.</p>
+        </div>
+        <div class="start-list" id="startList"></div>
+
+        <div class="section-head">
+          <h2 class="section-title">All banking companies</h2>
+          <p class="section-sub">If you already have one in mind.</p>
+        </div>
+        <div class="company-list">
+          <div class="co-row">
+            <div class="co-mark">AC</div>
+            <div class="co-row-body">
+              <div class="co-row-name">Access Holdings</div>
+              <div class="co-row-note">One of Nigeria's largest banking groups by assets</div>
+            </div>
+            <i class="ti ti-chevron-right"></i>
+          </div>
+          <div class="co-row">
+            <div class="co-mark">FB</div>
+            <div class="co-row-body">
+              <div class="co-row-name">FBN Holdings</div>
+              <div class="co-row-note">Why is it always mentioned as "the old one"? A turnaround story in progress</div>
+            </div>
+            <i class="ti ti-chevron-right"></i>
+          </div>
+          <div class="co-row">
+            <div class="co-mark">FC</div>
+            <div class="co-row-body">
+              <div class="co-row-name">Fidelity Bank</div>
+              <div class="co-row-note">A mid-tier bank punching above its weight in retail</div>
+            </div>
+            <i class="ti ti-chevron-right"></i>
+          </div>
+          <div class="co-row">
+            <div class="co-mark">ST</div>
+            <div class="co-row-body">
+              <div class="co-row-name">Stanbic IBTC</div>
+              <div class="co-row-note">A bank that also runs one of the country's largest asset managers</div>
+            </div>
+            <i class="ti ti-chevron-right"></i>
+          </div>
+          <div class="co-row">
+            <div class="co-mark">WM</div>
+            <div class="co-row-body">
+              <div class="co-row-name">Wema Bank</div>
+              <div class="co-row-note">Known for its digital banking strategy through ALAT</div>
+            </div>
+            <i class="ti ti-chevron-right"></i>
+          </div>
+          <div class="co-row">
+            <div class="co-mark">JZ</div>
+            <div class="co-row-body">
+              <div class="co-row-name">Jaiz Bank</div>
+              <div class="co-row-note">A different banking model based on non-interest finance</div>
+            </div>
+            <i class="ti ti-chevron-right"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const companies = [
+    { id:'gtco', tag:'profitability', mark:'GT', name:'GTCO', reason:"A straightforward place to understand how profitable banks generate consistent returns.", learn:"profitability, dividends, and efficient operations" },
+    { id:'zenith', tag:'capital', mark:'ZB', name:'Zenith Bank', reason:"A large, established bank useful as a baseline for comparing others in the sector.", learn:"scale, capital strength, and stable earnings" },
+    { id:'uba', tag:'footprint', mark:'UB', name:'UBA', reason:"Pan-African operations make its business look different from banks focused only on Nigeria.", learn:"geographic diversification and cross-border banking" }
+  ];
+
+  const compareItems = [
+    { id:'profitability', icon:'ti-chart-line', name:'Profitability', note:'How much the bank actually earns from its lending' },
+    { id:'capital', icon:'ti-shield', name:'Capital strength', note:'The cushion the bank keeps for hard times' },
+    { id:'footprint', icon:'ti-map-pin', name:'Business footprint', note:'Whether it operates in one market or several' },
+    { id:'loanquality', icon:'ti-checks', name:'Loan quality', note:'Whether borrowers are paying back on time' },
+    { id:'dividends', icon:'ti-coins', name:'Dividend history', note:'Whether it consistently returns money to shareholders' }
+  ];
+
+  const kickerText = {
+    profitability: "Since you're curious about <b>profitability</b> —",
+    capital: "Since you're curious about <b>capital strength</b> —",
+    footprint: "Since you're curious about <b>business footprint</b> —",
+    unsure: "Totally fine — here's a simple starting framework."
+  };
+
+  function renderStartList(highlightTag){
+    const listEl = document.getElementById('startList');
+    let ordered = [...companies];
+    if(highlightTag){
+      ordered.sort((a,b) => (a.tag === highlightTag ? -1 : 0) - (b.tag === highlightTag ? -1 : 0));
+    }
+    listEl.innerHTML = ordered.map(c => `
+      <div class="start-card ${c.tag === highlightTag ? 'matched' : ''}">
+        ${c.tag === highlightTag ? '<div class="matched-tag">Matches what you noticed</div>' : ''}
+        <div class="start-head">
+          <div class="co-mark">${c.mark}</div>
+          <div><div class="co-name">${c.name}</div><div class="co-sector">Banking</div></div>
+        </div>
+        <div>
+          <div class="start-reason-kicker">Why it's a good place to start</div>
+          <p class="start-reason">${c.reason}</p>
+          <div class="learn-line"><b>Notable for:</b> ${c.learn}</div>
+        </div>
+        <div class="start-foot">
+          <span class="start-foot-time">5 min read</span>
+          <div class="start-foot-cta">Analyze<i class="ti ti-arrow-right"></i></div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderCompareList(pinTag){
+    const listEl = document.getElementById('compareList');
+    let ordered = [...compareItems];
+    if(pinTag){
+      ordered.sort((a,b) => (a.id === pinTag ? -1 : 0) - (b.id === pinTag ? -1 : 0));
+    }
+    listEl.innerHTML = ordered.map(item => `
+      <div class="compare-item ${item.id === pinTag ? 'pinned' : ''}">
+        <div class="compare-marker"><i class="ti ${item.icon}"></i></div>
+        <div class="compare-item-body">
+          <div class="compare-item-name">${item.name} ${item.id === pinTag ? '<span class="pinned-tag">What you noticed</span>' : ''}</div>
+          <div class="compare-item-note">${item.note}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  renderStartList(null);
+  renderCompareList(null);
+</script>
+
+</body>
+</html>
