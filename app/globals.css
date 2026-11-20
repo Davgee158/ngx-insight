@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 :root {
+  --font-inter: Inter, "Segoe UI", Arial, sans-serif;
+  --font-fraunces: Fraunces, Georgia, "Times New Roman", serif;
+  --font-plex-mono: "IBM Plex Mono", Consolas, "Courier New", monospace;
+
   --color-ink: #14181c;
   --color-ink-deep: #0e1114;
   --color-ink-soft: #4b5158;
