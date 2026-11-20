@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { IconChevronRight } from "@tabler/icons-react";
 import { TickerBadge } from "@/components/company/ticker-badge";
 import { AppBackButton } from "@/components/app-shell/app-back-button";
@@ -6,6 +7,8 @@ import { getDiscoverCompanies } from "@/lib/discover/companies";
 import { getLatestSharePriceObservations } from "@/lib/data-import/observation-repository";
 
 export default async function DiscoverCompaniesPage() {
+  await connection();
+
   const [companies, priceObservations] = await Promise.all([
     getDiscoverCompanies(),
     getLatestSharePriceObservations(),
