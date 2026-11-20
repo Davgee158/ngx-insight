@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NGX Insight — How Insight Works v2 (richer visual treatment)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,650&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+  :root{
+    --ink:#14181C; --ink-soft:#4B5158; --ink-mute:#5A6167;
+    --page:#F5F5F1; --surface:#FFFFFF; --surface-tint:#EFF1EC; --border:#E4E3DA;
+    --indigo:#5A54C4; --indigo-tint:#ECEAFA; --indigo-deep:#332F86;
+    --green:#1E8E5A; --green-tint:#E6F4EC; --red:#B75151; --red-tint:#FBEDED;
+    --radius-lg:24px; --radius-md:18px; --radius-sm:12px;
+    --shadow-hero: 0 2px 4px rgba(20,24,28,0.04), 0 14px 32px rgba(20,24,28,0.08);
+    --shadow-card: 0 1px 2px rgba(20,24,28,0.03), 0 6px 18px rgba(20,24,28,0.05);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#DCDCD5;font-family:'Inter',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding:40px;}
+  .frames{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+  .frame-block{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .frame-label{font-size:13px;font-weight:500;color:var(--ink-soft);background:var(--surface);border:1px solid var(--border);padding:6px 14px;border-radius:999px;}
+  .frame-note{max-width:393px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;background:var(--surface);border:1px dashed var(--border);padding:10px 14px;border-radius:12px;}
+  .frame-note b{color:var(--ink);}
+  .device{width:393px;height:852px;background:var(--page);border-radius:52px;border:1px solid #C9C9C1;box-shadow:0 30px 60px rgba(0,0,0,0.18);overflow:hidden;position:relative;display:flex;flex-direction:column;}
+  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:28px;background:#000;border-radius:16px;z-index:30;}
+  .scroll{flex:1;overflow-y:auto;padding:60px 20px 40px;}
+  .scroll::-webkit-scrollbar{display:none;}
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible{outline:2px solid var(--indigo-deep); outline-offset:2px; border-radius:8px;}
+
+  .back-header{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+  .back-btn{width:36px;height:36px;border-radius:11px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);flex-shrink:0;}
+  .back-btn i{font-size:18px;}
+
+  /* Hero: replaces the plain <h1> with something that carries more weight */
+  .explainer-hero{margin-bottom:30px;}
+  .explainer-kicker{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--indigo-deep);margin-bottom:10px;}
+  .explainer-title{font-family:'Fraunces',serif;font-size:27px;font-weight:500;letter-spacing:-0.018em;line-height:1.18;margin:0;}
+  .explainer-title em{font-style:italic;font-weight:400;color:var(--ink-soft);}
+
+  .principle{margin-bottom:30px;padding-bottom:30px;border-bottom:1px solid var(--border);}
+  .principle:last-of-type{border-bottom:none;}
+  .principle-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
+  .principle-icon{width:34px;height:34px;border-radius:10px;background:var(--indigo-tint);color:var(--indigo-deep);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .principle-icon i{font-size:16px;}
+  .principle-title{font-family:'Fraunces',serif;font-size:16.5px;font-weight:500;letter-spacing:-0.01em;color:var(--ink);margin-bottom:4px;}
+  .principle-copy{font-size:13px;color:var(--ink-soft);line-height:1.55;}
+
+  /* Signature visual 1 — jargon translated, for "Understand businesses" */
+  .translate-demo{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;margin-top:4px;box-shadow:var(--shadow-card);}
+  .translate-row{display:flex;align-items:center;gap:10px;}
+  .translate-jargon{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-mute);background:var(--surface-tint);padding:5px 9px;border-radius:7px;white-space:nowrap;}
+  .translate-arrow{color:var(--indigo-deep);font-size:14px;flex-shrink:0;}
+  .translate-plain{font-size:12.5px;color:var(--ink);line-height:1.4;}
+
+  /* Signature visual 2 — mini comparison bars, for "Compare evidence" */
+  .compare-demo{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;margin-top:4px;box-shadow:var(--shadow-card);}
+  .compare-metric-label{font-size:11px;color:var(--ink-mute);margin-bottom:10px;}
+  .compare-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .compare-row:last-child{margin-bottom:0;}
+  .compare-name{font-size:11.5px;font-weight:600;color:var(--ink);width:52px;flex-shrink:0;}
+  .compare-track{flex:1;height:8px;background:var(--surface-tint);border-radius:4px;overflow:hidden;}
+  .compare-fill{height:100%;border-radius:4px;background:var(--indigo);}
+  .compare-fill.dim{background:var(--border);}
+  .compare-val{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);width:38px;text-align:right;flex-shrink:0;}
+
+  /* Lens teaser — reused from Profile v2 */
+  .lens-teaser{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 14px;margin-top:4px;box-shadow:var(--shadow-card);}
+  .lens-teaser-row{display:flex;align-items:center;gap:10px;padding:6px 0;}
+  .lens-teaser-row + .lens-teaser-row{border-top:1px solid var(--border);}
+  .lens-teaser-icon{color:var(--indigo-deep);font-size:14px;flex-shrink:0;}
+  .lens-teaser-text{font-size:12px;color:var(--ink);flex:1;}
+  .lens-teaser-link{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;color:var(--indigo-deep);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);cursor:pointer;}
+  .lens-teaser-link i{font-size:13px;}
+
+  /* Signature element — crossed-out "Strong Buy" badge, for "Your decisions stay yours" */
+  .no-badge-demo{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-top:4px;box-shadow:var(--shadow-card);display:flex;align-items:center;gap:14px;}
+  .fake-badge{position:relative;flex-shrink:0;}
+  .fake-badge-pill{background:var(--red-tint);color:var(--red);font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:500;letter-spacing:0.02em;padding:6px 12px;border-radius:999px;white-space:nowrap;}
+  .fake-badge-strike{position:absolute;top:50%;left:-4px;right:-4px;height:2px;background:var(--red);transform:rotate(-6deg);}
+  .no-badge-text{font-size:12.5px;color:var(--ink-soft);line-height:1.5;}
+  .no-badge-text b{color:var(--ink);font-weight:600;}
+
+  .why-block{margin:24px 0 18px;padding-top:22px;border-top:1px solid var(--border);}
+  .why-title{font-family:'Fraunces',serif;font-size:15px;font-weight:500;letter-spacing:-0.01em;margin-bottom:8px;color:var(--ink);}
+  .why-copy{font-size:12.5px;color:var(--ink-soft);line-height:1.6;}
+  .compliance-footer{background:var(--surface-tint);border-radius:var(--radius-md);padding:14px 16px;margin-top:8px;}
+  .compliance-footer-text{font-size:12px;color:var(--ink-soft);line-height:1.5;}
+</style>
+</head>
+<body>
+
+<div class="frames">
+
+  <div class="frame-block">
+    <div class="frame-label">"How Insight works" v2 — each principle gets a concrete visual</div>
+    <div class="frame-note">Same four principles, same copy voice — but each one now <b>shows</b> rather than just states. "Understand" gets a real jargon→plain translation. "Compare" gets an actual mini bar comparison. "Record" keeps the real saved-lens preview. "Decisions stay yours" is the one bold risk: a crossed-out "Strong Buy" badge — the exact thing this app deliberately doesn't do, made visible instead of described. Added a kicker line above the title so the hero isn't just a bare headline anymore.</div>
+    <div class="device">
+      <div class="notch"></div>
+      <div class="scroll">
+        <div class="back-header"><div class="back-btn"><i class="ti ti-arrow-left"></i></div></div>
+
+        <div class="explainer-hero">
+          <div class="explainer-kicker">The philosophy</div>
+          <h1 class="explainer-title">How Insight works.</h1>
+        </div>
+
+        <div class="principle">
+          <div class="principle-head">
+            <div class="principle-icon"><i class="ti ti-building"></i></div>
+            <div>
+              <div class="principle-title">Understand businesses</div>
+              <div class="principle-copy">We break financial reports into plain language so you can understand how a company makes money and whether the business is improving.</div>
+            </div>
+          </div>
+          <div class="translate-demo">
+            <div class="translate-row">
+              <span class="translate-jargon">Gross margin −340bps</span>
+              <i class="ti ti-arrow-right translate-arrow"></i>
+              <span class="translate-plain">Costs are rising faster than prices can keep up.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="principle">
+          <div class="principle-head">
+            <div class="principle-icon"><i class="ti ti-arrows-right-left"></i></div>
+            <div>
+              <div class="principle-title">Compare evidence</div>
+              <div class="principle-copy">Instead of showing a number in isolation, we help you compare it with competitors and understand what it may indicate.</div>
+            </div>
+          </div>
+          <div class="compare-demo">
+            <div class="compare-metric-label">Net profit margin</div>
+            <div class="compare-row">
+              <div class="compare-name">GTCO</div>
+              <div class="compare-track"><div class="compare-fill" style="width:78%;"></div></div>
+              <div class="compare-val">31.2%</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-name">Zenith</div>
+              <div class="compare-track"><div class="compare-fill dim" style="width:61%;"></div></div>
+              <div class="compare-val">24.6%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="principle">
+          <div class="principle-head">
+            <div class="principle-icon"><i class="ti ti-notebook"></i></div>
+            <div>
+              <div class="principle-title">Record your thinking</div>
+              <div class="principle-copy">Watchlists, portfolios, and your Decision Journal remember your own investment journey.</div>
+            </div>
+          </div>
+          <div class="lens-teaser">
+            <div class="lens-teaser-row">
+              <i class="ti ti-bookmark-filled lens-teaser-icon"></i>
+              <div class="lens-teaser-text">Businesses that can raise prices without losing customers</div>
+            </div>
+            <div class="lens-teaser-row">
+              <i class="ti ti-bookmark-filled lens-teaser-icon"></i>
+              <div class="lens-teaser-text">Companies that benefit when oil prices move</div>
+            </div>
+            <div class="lens-teaser-link">View all saved lenses<i class="ti ti-arrow-right"></i></div>
+          </div>
+        </div>
+
+        <div class="principle">
+          <div class="principle-head">
+            <div class="principle-icon"><i class="ti ti-user-check"></i></div>
+            <div>
+              <div class="principle-title">Your decisions stay yours</div>
+              <div class="principle-copy">No recommendations, no ratings, and no "Strong Buy" badges. We show the evidence so you can reach your own conclusion.</div>
+            </div>
+          </div>
+          <div class="no-badge-demo">
+            <div class="fake-badge">
+              <span class="fake-badge-pill">STRONG BUY</span>
+              <div class="fake-badge-strike"></div>
+            </div>
+            <div class="no-badge-text">You'll never see this in Insight. <b>Just evidence — you decide.</b></div>
+          </div>
+        </div>
+
+        <div class="why-block">
+          <div class="why-title">Why we built this</div>
+          <div class="why-copy">Many investing apps assume you already know how to evaluate a business, or rely heavily on analyst opinions. Insight was built to help people develop the confidence to make informed investment decisions using evidence they can understand.</div>
+        </div>
+
+        <div class="compliance-footer">
+          <p class="compliance-footer-text">Insight doesn't execute trades. Anything you buy or sell happens through your own broker — we help you decide, not transact.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NGX Insight
 
-## Getting Started
+NGX Insight is a beginner-focused research prototype for companies listed on the Nigerian Exchange. The current MVP target is **banks only**, with **no authentication**. Market data will be integrated server-side from three provider sources; personal research records remain local to the current browser for this MVP.
 
-First, run the development server:
+## Run locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open <http://localhost:3000>.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Other project checks:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run build
+```
 
-## Learn More
+The production build needs the configured Google Fonts to be available during build, or the project must use locally hosted font files. The developer reports that the development server runs; check a production build in the intended environment before changing the font setup.
 
-To learn more about Next.js, take a look at the following resources:
+## Project notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [MVP implementation plan](MVP_IMPLEMENTATION_PLAN.md): current scope, phased delivery plan, acceptance criteria, and known prototype gaps.
+- [Mockup consolidation guide](public/ngx-mockups/CONSOLIDATION_GUIDE.md): visual source-of-truth mapping and notes on consolidated references.
+- High-fidelity HTML mockups and Iris SVG assets are in `public/ngx-mockups/`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Preserve the existing visual system and components. See `AGENTS.md` before making code changes; this project uses Next.js 16.2.10 and requires checking the matching installed Next.js documentation for framework changes.

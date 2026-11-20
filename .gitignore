@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# Local developer and database-tool configuration
+/.agents/
+/.claude/
+/.codex/
+/.neon

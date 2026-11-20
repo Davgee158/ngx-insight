@@ -14,6 +14,20 @@ Analysis files are fragments of one page rather than five separate pages.
 
 ## Company Analysis — 6 files are ONE page, not six
 
+**IMPORTANT — read this first.** There is a 7th file, `ngx-insight-company-analysis.html`
+(no suffix), not originally listed in this guide. It is the actual **master
+consolidated reference** — it already assembles the Hub (all 3 concrete
+relationship states), the Section Detail template, the Quick Check
+full-breakdown screen, the Compare With peer-breakdown screen, and the
+Buy/Sell/Pass sheets, all in one file, in the shape this guide's own "What
+the ONE consolidated file should contain" section describes. **Build from
+this file directly** rather than piecing the 6 fragments below back
+together — it already did that work and is the most current source. The 6
+fragments below remain useful for their frame-notes (the *why* behind each
+decision), but the master file's actual markup/copy wins on any conflict.
+
+The 6 fragments, for reference / rationale only:
+
 None of these files alone is the final page. Each contributed something the
 others don't have.
 
@@ -110,3 +124,47 @@ refined formats — i.e., the shape of v1, the substance of v2.
 Home, Discover, Sector View, Compare Sectors, Search, Bottom Nav, Watchlist
 (v4 + v2's removal flow), Portfolio (v1 + edge-cases), and Profile do not
 need consolidation — each is already one coherent reference.
+
+---
+
+## Implementation status and MVP scope
+
+This section is a concise status snapshot. Follow the root
+`MVP_IMPLEMENTATION_PLAN.md` for the full scope, phases, decisions, and
+acceptance criteria. The MVP target is NGX-listed banks only, with no
+authentication. It is a private, personal learning project with no planned
+public launch, and keeps personal research records in the current browser.
+
+The source now contains routes and UI beyond the earlier status below. Current
+coverage is still prototype-level and data is mock-backed. The current MVP
+scope is banks only, with no authentication. NGN Market is intended for
+company identifiers, index/market context, and official disclosures; Kobo
+Terminal is intended for latest prices and market snapshots. The owner also
+intends to use TradingView as a supplementary research source for metrics the
+API providers do not supply, and will provide that collected data to the
+project. Insight will import the supplied dataset into its own small database;
+the scraping mechanism is outside the app. Agree on its format, provenance,
+timestamps, and intended handling before implementation. See the root
+`MVP_IMPLEMENTATION_PLAN.md` for provider checks and the implementation
+sequence.
+
+- Home contains `discovery`, `researching`, and `stewardship` modes, but the
+  view-model content is still partly fixed mock data.
+- Discover, banking Sector View, sector comparison, company analysis, section
+  detail, Quick Check breakdown, peer comparison, Watchlist, Portfolio,
+  Profile, saved lenses, and How Insight Works have routes or components.
+- GTCO is the only company with a full Company Analysis record. Banking is
+  the only detailed Sector View. Sector, company, and lens data coverage is
+  partial.
+- Search is not functional yet. Watchlist removal is component-local rather
+  than persisted through shared app state. The Pass sheet does not save its
+  reason or note. The Decision Journal has a consolidated design reference
+  but no implemented route or event storage.
+- App engagement state uses browser `localStorage`; no provider API, database,
+  authentication, or server persistence is connected. Provider names and
+  intended roles are now recorded, but access, coverage, plan limits, field
+  ownership, and permitted display/storage terms still need confirmation.
+
+The intended mockup map is recorded in `MVP_IMPLEMENTATION_PLAN.md`. There is
+currently no `index.html` in this folder; add or update an index only if a
+separate mockup navigation page is created.

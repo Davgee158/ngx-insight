@@ -1,3 +1,8 @@
+/* Hallmark · component: nav (N5 floating pill) · genre: editorial (inherited)
+ * states: default · hover · focus-visible · active(press) · current(selected)
+ * loading / error / success: n/a — a nav tab has no such semantics
+ * tokens: existing project tokens only (app/globals.css) — no new theme
+ */
 "use client";
 
 import Link from "next/link";
@@ -15,13 +20,12 @@ interface Tab {
   href: string;
   label: string;
   icon: TablerIcon;
-  showDot?: boolean;
 }
 
 const TABS: Tab[] = [
   { href: "/", label: "Home", icon: IconHome },
   { href: "/discover", label: "Discover", icon: IconCompass },
-  { href: "/watchlist", label: "Watchlist", icon: IconEye, showDot: true },
+  { href: "/watchlist", label: "Watchlist", icon: IconEye },
   { href: "/portfolio", label: "Portfolio", icon: IconWallet },
   { href: "/profile", label: "Profile", icon: IconUser },
 ];
@@ -30,42 +34,41 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 flex justify-around border-t border-border bg-surface/90 px-2 pt-3 pb-6 backdrop-blur-md">
-      {TABS.map((tab) => {
-        const isActive =
-          tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
-        const Icon = tab.icon;
+    <div className="fixed inset-x-0 bottom-[calc(1.25rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4">
+      <nav
+        aria-label="Primary"
+        className="flex items-center gap-1 rounded-full bg-ink-deep p-1.5 shadow-float backdrop-blur-md"
+      >
+        {TABS.map((tab) => {
+          const isActive =
+            tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
+          const Icon = tab.icon;
 
-        return (
-          <Link
-            key={tab.href}
-            href={tab.href}
-            className={`flex w-14 flex-col items-center gap-1 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo ${
-              isActive ? "text-ink" : "text-ink-mute"
-            }`}
-          >
-            <span className="relative flex items-center justify-center">
-              <span
-                className={
-                  isActive
-                    ? "flex items-center justify-center rounded-[10px] bg-indigo-tint px-3 py-0.5"
-                    : ""
-                }
-              >
-                <Icon
-                  size={22}
-                  stroke={1.75}
-                  className={isActive ? "text-indigo-deep" : undefined}
-                />
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              aria-current={isActive ? "page" : undefined}
+              className={`relative flex items-center rounded-full transition-colors duration-150 ease-out active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-light ${
+                isActive
+                  ? "gap-1.5 bg-white/15 px-3.5 py-2.5 text-white"
+                  : "h-11 w-11 justify-center text-white/62 hover:text-white/80"
+              }`}
+            >
+              <span className="relative flex items-center justify-center">
+                <Icon size={19} stroke={1.75} />
               </span>
-              {tab.showDot && (
-                <span className="absolute -top-0.5 right-0 h-1.5 w-1.5 rounded-full bg-indigo" />
+              {isActive ? (
+                <span className="text-[12.5px] font-medium tracking-tight">
+                  {tab.label}
+                </span>
+              ) : (
+                <span className="sr-only">{tab.label}</span>
               )}
-            </span>
-            <span className="text-[10px] font-medium">{tab.label}</span>
-          </Link>
-        );
-      })}
-    </nav>
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
   );
 }

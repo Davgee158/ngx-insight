@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
+import { AppStateProvider } from "@/lib/app-state/app-state-context";
 import "./globals.css";
 
 const inter = Inter({
@@ -34,9 +35,10 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${inter.variable} ${fraunces.variable} ${plexMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full bg-page" suppressHydrationWarning>
-        {children}
+        <AppStateProvider>{children}</AppStateProvider>
       </body>
     </html>
   );
