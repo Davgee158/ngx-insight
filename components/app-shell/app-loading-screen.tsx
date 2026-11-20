@@ -12,7 +12,7 @@ export function AppLoadingScreen() {
 
   return (
     <div
-      className="flex min-h-[calc(100vh-6rem)] items-center justify-center"
+      className="app-route-loading-screen"
       role="status"
       aria-label="Loading page"
     >
